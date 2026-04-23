@@ -1,0 +1,81 @@
+/*
+ * GBAKI-Searcher — globals.css
+ * Design system : académique, chaleureux, humain
+ * Palette : bleu ENSEA #1a56db + tons crème/ardoise
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Couleurs principales */
+  --blue:        #1a56db;
+  --blue-dark:   #1e429f;
+  --blue-deeper: #1e3a8a;
+  --blue-light:  #ebf5ff;
+  --blue-mid:    #3f83f8;
+
+  /* Teintes chaudes pour ambiance académique */
+  --cream:       #faf8f4;
+  --warm-gray:   #f5f3ef;
+  --paper:       #fffef9;
+
+  /* Texte */
+  --ink:         #1c1917;
+  --ink-soft:    #44403c;
+  --ink-muted:   #78716c;
+  --ink-light:   #a8a29e;
+
+  /* Surface / borders */
+  --surface:     #ffffff;
+  --surface-2:   #f8f7f4;
+  --surface-3:   #f0ede8;
+  --border:      #e5e0d8;
+  --border-light:#ede9e3;
+
+  /* States */
+  --error:       #dc2626;
+  --success:     #059669;
+  --warning:     #d97706;
+
+  /* Shadows — douces et chaleureuses */
+  --shadow-xs:   0 1px 3px rgba(28,25,23,0.06);
+  --shadow-sm:   0 2px 8px rgba(28,25,23,0.08);
+  --shadow:      0 4px 20px rgba(28,25,23,0.10);
+  --shadow-lg:   0 8px 40px rgba(28,25,23,0.12);
+  --shadow-blue: 0 4px 20px rgba(26,86,219,0.18);
+
+  /* Radius */
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r:     14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+
+  /* Layout */
+  --sidebar: 252px;
+  --header:  62px;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Plus Jakarta Sans', Georgia, 'Times New Roman', serif;
+  background: var(--cream);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* Scrollbar discrète */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d6d0c8; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #b5afa6; }

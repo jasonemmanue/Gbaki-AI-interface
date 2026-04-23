@@ -1,0 +1,466 @@
+/* ─── Page Layout ─────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 16px;
+  background: #e8f0fb;
+  position: relative;
+  overflow: hidden;
+}
+
+.blob1 {
+  position: fixed;
+  top: -120px;
+  left: -120px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(37,99,235,0.13) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob2 {
+  position: fixed;
+  bottom: -100px;
+  right: -100px;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(37,99,235,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Card ────────────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(37,99,235,0.10), 0 1px 3px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 460px;
+  padding: 36px 36px 32px;
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 6px;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.logoLabel {
+  display: flex;
+  flex-direction: column;
+}
+
+.logoEnsea {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1d4ed8;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.logoDsc {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 400;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ─── Tabs ────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  gap: 2px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  font-family: inherit;
+}
+
+.tab:hover:not(.tabActive) {
+  color: #1e293b;
+  background: rgba(255,255,255,0.6);
+}
+
+.tabActive {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.28);
+}
+
+/* ─── Form ────────────────────────────────────────────────── */
+.formContainer {
+  animation: fadeIn 0.3s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ─── Field ───────────────────────────────────────────────── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 0.01em;
+}
+
+/*
+ * ── inputWrapper ─────────────────────────────────────────────
+ * Règles clés pour que la bordure ne disparaisse JAMAIS :
+ *   - box-sizing: border-box  → la bordure est incluse dans la taille
+ *   - width: 100%             → prend toute la largeur disponible
+ *   - display: flex           → aligne icône + input + eyeBtn
+ *   - border: 2px solid       → visible, gris au repos, bleu au focus
+ *   - overflow: visible       → ne coupe pas la box-shadow de focus
+ * ──────────────────────────────────────────────────────────────
+ */
+.inputWrapper {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  overflow: visible;
+  position: relative;
+}
+
+.inputWrapper:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  background: #ffffff;
+  outline: none;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important;
+  background: #fff5f5 !important;
+}
+
+.inputIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+/*
+ * ── input ──────────────────────────────────────────────────
+ * - flex: 1 + min-width: 0  → prend l'espace restant sans déborder
+ * - height: 48px             → hauteur fixe garantie
+ * - border: none             → pas de double bordure
+ * ───────────────────────────────────────────────────────────
+ */
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  border: none;
+  background: transparent;
+  padding: 0 12px 0 0;
+  font-size: 14.5px;
+  color: #1e293b;
+  outline: none;
+  font-family: inherit;
+  display: block;
+}
+
+.input::placeholder {
+  color: #b0bec5;
+}
+
+.eyeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  flex-shrink: 0;
+  height: 48px;
+  transition: color 0.15s;
+}
+
+.eyeBtn:hover {
+  color: #2563eb;
+}
+
+.errorMsg {
+  font-size: 12px;
+  color: #ef4444;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.errorMsg::before {
+  content: '⚠';
+  font-size: 11px;
+}
+
+/* ─── Password Strength ───────────────────────────────────── */
+.strengthBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.strengthFill {
+  height: 4px;
+  border-radius: 4px;
+  transition: width 0.3s ease, background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.strengthLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+/* ─── Submit Button — BLEU #2563eb ────────────────────────── */
+.submitBtn {
+  width: 100%;
+  padding: 14px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background-color 0.18s, transform 0.12s, box-shadow 0.18s;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  font-family: inherit;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #1d4ed8;
+  box-shadow: 0 6px 20px rgba(37,99,235,0.38);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  background-color: #2563eb;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* ─── Spinner ─────────────────────────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Forgot password link ────────────────────────────────── */
+.forgotWrapper {
+  text-align: center;
+  margin-top: -4px;
+}
+
+.forgotLink {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.forgotLink:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* ─── Back link (forgot-password page) ───────────────────── */
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+}
+
+.backLink:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* ─── Success State ───────────────────────────────────────── */
+.successBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 16px;
+  animation: fadeIn 0.35s ease both;
+}
+
+.successIcon {
+  width: 56px;
+  height: 56px;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.successTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.successSub {
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ─── Footer ──────────────────────────────────────────────── */
+.footer {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  font-weight: 500;
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .page {
+    padding: 16px 12px 16px;
+    justify-content: flex-start;
+    padding-top: 32px;
+  }
+  .card {
+    padding: 28px 20px 24px;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+  .title { font-size: 24px; }
+  .subtitle { font-size: 13px; }
+  .tab { padding: 9px 10px; font-size: 13.5px; }
+  /* iOS : évite le zoom automatique sur focus */
+  .input { font-size: 16px; }
+  .submitBtn { font-size: 15px; padding: 14px; }
+  .blob1, .blob2 { width: 220px; height: 220px; }
+}
+
+@media (max-width: 360px) {
+  .card { padding: 22px 14px 20px; }
+  .logoWrapper { flex-direction: column; text-align: center; }
+  .logoLabel { align-items: center; }
+}
+
+@media (min-width: 768px) {
+  .card { max-width: 480px; }
+}
