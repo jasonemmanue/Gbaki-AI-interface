@@ -215,7 +215,7 @@ function LoginForm() {
         {loading ? <span className={styles.spinner} /> : 'Se connecter'}
       </button>
       <div className={styles.forgotWrapper}>
-        <a href="/auth/forgot-password" className={styles.forgotLink}>
+        <a href="/forgot" className={styles.forgotLink}>
           Mot de passe oublié ?
         </a>
       </div>

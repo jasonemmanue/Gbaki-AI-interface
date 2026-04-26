@@ -1,0 +1,24 @@
+.page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: #f1f5f9; }
+.card { background: #fff; border-radius: 20px; padding: 40px 36px; box-shadow: 0 4px 40px rgba(0,0,0,0.09); width: 100%; max-width: 420px; }
+.logo { font-size: 22px; font-weight: 800; color: #0f1629; margin-bottom: 28px; }
+.logo span { color: #5b6cff; }
+.title { font-size: 20px; font-weight: 800; color: #0f1629; margin-bottom: 6px; }
+.sub { font-size: 13.5px; color: #64748b; margin-bottom: 28px; line-height: 1.5; }
+.sub strong { color: #0f1629; }
+.label { display: block; font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.emailInput { width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #0f1629; outline: none; transition: border-color 0.15s; font-family: inherit; }
+.emailInput:focus { border-color: #5b6cff; }
+.btn { width: 100%; padding: 13px; margin-top: 20px; background: #1a2340; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; font-family: inherit; }
+.btn:hover:not(:disabled) { background: #0f1629; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+.success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+.otpRow { display: flex; gap: 12px; justify-content: center; margin: 28px 0; }
+.otpInput { width: 64px; height: 72px; border: 2px solid #e2e8f0; border-radius: 14px; text-align: center; font-size: 28px; font-weight: 800; color: #0f1629; outline: none; transition: border-color 0.15s, box-shadow 0.15s; background: #f8fafc; font-family: inherit; }
+.otpInput:focus { border-color: #5b6cff; box-shadow: 0 0 0 3px rgba(91,108,255,0.15); background: #fff; }
+.otpFilled { border-color: #1a2340; background: #fff; }
+.resend { text-align: center; font-size: 13px; color: #64748b; margin-top: 16px; }
+.resendBtn { background: none; border: none; font-weight: 700; color: #5b6cff; cursor: pointer; font-size: 13px; font-family: inherit; }
+.resendBtn:disabled { color: #94a3b8; cursor: not-allowed; }
+.back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; text-decoration: none; margin-top: 24px; justify-content: center; }
+.back:hover { color: #0f1629; }

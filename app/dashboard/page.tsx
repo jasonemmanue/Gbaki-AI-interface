@@ -296,7 +296,7 @@ export default function DashboardPage() {
             <Image src="/logo.png" alt="ENSEA DSC" width={38} height={38}
               style={{borderRadius:9, objectFit:'contain', flexShrink:0}} priority/>
             <div className={s.brandNames}>
-              <span className={s.brandApp}>G<span>-baki</span></span>
+              <span className={s.brandApp}>G<span>-baki AI</span></span>
               <span className={s.brandSub}>ENSEA Data Science Club</span>
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function DashboardPage() {
             setFilters({ class_id: profile?.class_id ?? '', subject_id:'', year_id:'', type_id:'', teacher_id:'' })
           }}><IC.Docs/>Tous les documents</button>
           <div className={s.navSection}>Mon compte</div>
-          <button className={s.navItem} onClick={() => router.push('/onboarding')}><IC.Settings/>Paramètres</button>
+          <button className={s.navItem} onClick={() => router.push('/settings')}><IC.Settings/>Paramètres</button>
         </nav>
         <div className={s.sidebarBottom}>
           <button className={s.logoutFull} onClick={handleLogout}><IC.Logout/> Se déconnecter</button>
