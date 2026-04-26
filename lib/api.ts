@@ -1,5 +1,4 @@
 // gbaki-searcher/lib/api.ts
-// Client API pour l'interface utilisateur (étudiant)
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
 
