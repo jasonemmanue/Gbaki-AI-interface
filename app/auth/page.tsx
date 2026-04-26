@@ -170,7 +170,7 @@ function LoginForm() {
       const data = await doLogin(email, password)
       setSuccess(true)
       setTimeout(() => {
-        router.push(data.is_first_login ? '/onboarding' : '/dashboard')
+        router.push(data.is_first_login ? '/onboarding' : '/splash')
       }, 800)
     } catch (err: unknown) {
       setErrors({ server: err instanceof Error ? err.message : 'Erreur de connexion' })

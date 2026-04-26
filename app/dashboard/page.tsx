@@ -293,8 +293,8 @@ export default function DashboardPage() {
       <aside className={`${s.sidebar} ${sideOpen ? s.sidebarOpen : ''}`}>
         <div className={s.sidebarTop}>
           <div className={s.brandRow}>
-           <Image src="/logo.png" alt="ENSEA DSC" width={38} height={38}
-              style={{objectFit:'contain', flexShrink:0}} priority/>
+            <Image src="/logo.png" alt="ENSEA DSC" width={38} height={38}
+              style={{borderRadius:9, objectFit:'contain', flexShrink:0}} priority/>
             <div className={s.brandNames}>
               <span className={s.brandApp}>G<span>-baki</span></span>
               <span className={s.brandSub}>ENSEA Data Science Club</span>
