@@ -1,19 +1,14 @@
-// ================================================================
 // gbaki-searcher/lib/api.ts
-// Stockage : gbaki-searcher/lib/api.ts
-// Client API centralisé — connexion au backend Django
-// ================================================================
+// Client API pour l'interface utilisateur (étudiant)
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
 
-/* ── Storage helpers ────────────────────────────── */
+/* ── Token helpers ────────────────────────────────── */
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null
   return localStorage.getItem('gbaki_token')
 }
-function saveToken(t: string) {
-  localStorage.setItem('gbaki_token', t)
-}
+export function saveToken(t: string) { localStorage.setItem('gbaki_token', t) }
 export function clearAuth() {
   localStorage.removeItem('gbaki_token')
   localStorage.removeItem('gbaki_profile')
@@ -23,11 +18,10 @@ export function saveProfile(p: UserProfile) {
 }
 export function getProfile(): UserProfile | null {
   if (typeof window === 'undefined') return null
-  try { return JSON.parse(localStorage.getItem('gbaki_profile') ?? 'null') }
-  catch { return null }
+  try { return JSON.parse(localStorage.getItem('gbaki_profile') ?? 'null') } catch { return null }
 }
 
-/* ── Core fetch ─────────────────────────────────── */
+/* ── Core fetch ───────────────────────────────────── */
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken()
   const headers: Record<string, string> = {
@@ -35,22 +29,17 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
     ...(options.headers as Record<string, string> ?? {}),
   }
   if (token) headers['Authorization'] = `Token ${token}`
-
   const res = await fetch(`${BASE}${path}`, { ...options, headers })
-
   if (!res.ok) {
     let msg = `Erreur ${res.status}`
-    try {
-      const d = await res.json()
-      msg = d.error ?? d.detail ?? Object.values(d)[0] ?? msg
-    } catch { /* ignore */ }
-    throw new Error(String(msg))
+    try { const d = await res.json(); msg = d.error ?? d.detail ?? msg } catch { /**/ }
+    throw new Error(msg)
   }
   if (res.status === 204) return {} as T
   return res.json()
 }
 
-/* ── Types ──────────────────────────────────────── */
+/* ── Types ────────────────────────────────────────── */
 export interface UserProfile {
   id: string
   email: string
@@ -76,12 +65,12 @@ export interface Document {
   clickable_link: string | null
   mime_type: string | null
   file_size: number | null
-  class_info: { code: string; label: string } | null
+  class_info: { code: string; label: string; id: string } | null
   subject: string | null
   document_type: string | null
   academic_year: string | null
   uploaded_by: string | null
-  teachers: { name: string; email: string }[]
+  teachers: { id: string; name: string; email: string; department: string }[]
   status: string
   is_published: boolean
   created_at: string
@@ -97,127 +86,109 @@ export interface DocumentsResponse {
 }
 
 export interface ClassItem {
-  id: string
-  code: string
-  label: string
-  cycle: string | null
-  level_order: number | null
+  id: string; code: string; label: string
+  cycle: string | null; level_order: number | null
 }
 
 export interface SubjectItem {
-  id: string
-  name: string
-  code: string | null
-  class_id: string | null
+  id: string; code: string | null; name: string
+  description: string | null; class_id: string | null
 }
 
-/* ── Auth ───────────────────────────────────────── */
-
-/**
- * Inscription — crée un User Django + Profile en base
- * POST /api/auth/register/
- */
-export async function apiRegister(
-  email: string,
-  password: string,
-  full_name: string
-): Promise<AuthResponse> {
-  const data = await apiFetch<AuthResponse>('/auth/register/', {
-    method: 'POST',
-    body: JSON.stringify({ email, password, full_name }),
-  })
-  saveToken(data.token)
-  saveProfile(data.profile)
-  return data
+export interface AcademicYear {
+  id: string; label: string; start_year: number; end_year: number; is_active: boolean
 }
 
-/**
- * Connexion
- * POST /api/auth/login/
- * Retourne is_first_login = true si l'utilisateur n'a pas encore de classe
- */
-export async function apiLogin(
-  email: string,
-  password: string
-): Promise<AuthResponse> {
+export interface DocumentType {
+  id: string; code: string | null; label: string
+}
+
+export interface Teacher {
+  id: string; full_name: string; email: string | null; department: string | null
+}
+
+export interface DownloadResponse {
+  url: string; file_name: string; mime_type: string | null
+}
+
+/* ── Auth ─────────────────────────────────────────── */
+export async function apiLogin(email: string, password: string): Promise<AuthResponse> {
   const data = await apiFetch<AuthResponse>('/auth/login/', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
+    method: 'POST', body: JSON.stringify({ email, password }),
   })
-  saveToken(data.token)
-  saveProfile(data.profile)
-  return data
+  saveToken(data.token); saveProfile(data.profile); return data
 }
 
-/**
- * Déconnexion
- * POST /api/auth/logout/
- */
+export async function apiRegister(email: string, password: string, full_name: string): Promise<AuthResponse> {
+  const data = await apiFetch<AuthResponse>('/auth/register/', {
+    method: 'POST', body: JSON.stringify({ email, password, full_name }),
+  })
+  saveToken(data.token); saveProfile(data.profile); return data
+}
+
 export async function apiLogout(): Promise<void> {
-  try {
-    await apiFetch('/auth/logout/', { method: 'POST' })
-  } finally {
-    clearAuth()
-  }
+  try { await apiFetch('/auth/logout/', { method: 'POST' }) } finally { clearAuth() }
 }
 
-/**
- * Profil courant
- * GET /api/auth/me/
- */
 export async function apiMe(): Promise<UserProfile> {
-  const data = await apiFetch<UserProfile>('/auth/me/')
-  saveProfile(data)
-  return data
+  const d = await apiFetch<UserProfile>('/auth/me/')
+  saveProfile(d); return d
 }
 
-/**
- * Mettre à jour le profil (filière/classe après onboarding)
- * PATCH /api/profiles/{id}/
- */
-export async function apiUpdateProfile(
-  profileId: string,
-  payload: { class_id?: string; full_name?: string; role?: string }
-): Promise<UserProfile> {
-  return apiFetch<UserProfile>(`/profiles/${profileId}/`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload),
-  })
+export async function apiUpdateProfile(id: string, payload: { class_id?: string; full_name?: string }): Promise<UserProfile> {
+  return apiFetch<UserProfile>(`/profiles/${id}/`, { method: 'PATCH', body: JSON.stringify(payload) })
 }
 
-/* ── Documents ──────────────────────────────────── */
+/* ── Documents ────────────────────────────────────── */
 export interface DocFilters {
   search?: string
   class_id?: string
   subject_id?: string
   academic_year_id?: string
   document_type_id?: string
-  is_published?: boolean
-  status?: string
+  teacher_id?: string
+  is_published?: string
 }
 
-export async function apiGetDocuments(
-  filters: DocFilters = {}
-): Promise<DocumentsResponse> {
+export async function apiGetDocuments(filters: DocFilters = {}): Promise<DocumentsResponse> {
   const p = new URLSearchParams()
-  if (filters.search)           p.set('search', filters.search)
-  if (filters.class_id)         p.set('class_id', filters.class_id)
-  if (filters.subject_id)       p.set('subject_id', filters.subject_id)
-  if (filters.academic_year_id) p.set('academic_year_id', filters.academic_year_id)
-  if (filters.document_type_id) p.set('document_type_id', filters.document_type_id)
-  if (filters.is_published !== undefined) p.set('is_published', String(filters.is_published))
-  if (filters.status)           p.set('status', filters.status)
-  const qs = p.toString()
-  return apiFetch<DocumentsResponse>(`/documents/${qs ? '?' + qs : ''}`)
+  // Toujours forcer is_published=true pour les users
+  p.set('is_published', 'true')
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v !== undefined && v !== '' && k !== 'is_published') p.set(k, v)
+  })
+  return apiFetch<DocumentsResponse>(`/documents/?${p.toString()}`)
 }
 
-/* ── Classes ────────────────────────────────────── */
+/* ── Download / Preview ───────────────────────────── */
+export async function apiGetDocumentUrl(id: string, mode: 'preview' | 'download' = 'preview'): Promise<DownloadResponse> {
+  return apiFetch<DownloadResponse>(`/documents/${id}/download/?mode=${mode}`)
+}
+
+/* ── Référentiels ─────────────────────────────────── */
 export async function apiGetClasses(): Promise<ClassItem[]> {
   return apiFetch<ClassItem[]>('/classes/')
 }
 
-/* ── Subjects ───────────────────────────────────── */
 export async function apiGetSubjects(classId?: string): Promise<SubjectItem[]> {
-  const qs = classId ? `?class_id=${classId}` : ''
-  return apiFetch<SubjectItem[]>(`/subjects/${qs}`)
+  return apiFetch<SubjectItem[]>(`/subjects/${classId ? '?class_id=' + classId : ''}`)
+}
+
+export async function apiGetYears(): Promise<AcademicYear[]> {
+  return apiFetch<AcademicYear[]>('/academic-years/')
+}
+
+export async function apiGetDocTypes(): Promise<DocumentType[]> {
+  return apiFetch<DocumentType[]>('/document-types/')
+}
+
+export async function apiGetTeachers(): Promise<Teacher[]> {
+  return apiFetch<Teacher[]>('/teachers/')
+}
+
+/* ── Autocomplete ─────────────────────────────────── */
+export async function apiAutocomplete(q: string): Promise<string[]> {
+  if (q.length < 2) return []
+  const d = await apiFetch<{ suggestions: string[] }>(`/autocomplete/documents/?q=${encodeURIComponent(q)}`)
+  return d.suggestions
 }

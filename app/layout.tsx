@@ -8,6 +8,10 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'GBAKI-Searcher — Manuel numérique ENSEA',
   description: 'Trouvez vos supports pédagogiques en quelques secondes. ENSEA Data Science Club.',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,264 +1,432 @@
 /*
  * gbaki-searcher/app/dashboard/page.tsx
- * LOGO : public/logo.png → 38×38px dans la sidebar (.brandLogo)
+ * Dashboard étudiant — design fidèle à la maquette + recherche Levenshtein
  */
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import s from './dashboard.module.css'
+import s from './user.module.css'
 import {
-  apiGetDocuments, apiLogout, apiMe,
-  getProfile, type Document, type UserProfile
+  apiGetDocuments, apiLogout, apiMe, apiGetClasses, apiGetSubjects,
+  apiGetYears, apiGetDocTypes, apiGetDocumentUrl,
+  apiGetTeachers,
+  getProfile,
+  type Document, type UserProfile, type ClassItem,
+  type SubjectItem, type AcademicYear, type DocumentType, type Teacher,
 } from '../../lib/api'
 
-const Icons = {
-  Home:     () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-  Docs:     () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
-  Search:   () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-  Bell:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
-  Logout:   () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-  Menu:     () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="19" height="19"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
-  Download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  Eye:      () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
-  Settings: () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+/* ══ Distance de Levenshtein ════════════════════════ */
+function levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  )
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+  return dp[m][n]
 }
 
-function BadgeEl({ label }: { label: string }) {
+function normalize(str: string) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+}
+
+function levenshteinSuggest(query: string, corpus: string[], limit = 7): string[] {
+  if (!query || query.length < 2) return []
+  const q = normalize(query)
+  const scored = corpus
+    .map(w => {
+      const nw = normalize(w)
+      const dist = levenshtein(q, nw)
+      const threshold = Math.floor(q.length / 3) + 1
+      const contains = nw.includes(q) ? -1 : 0
+      return { w, score: dist + contains, ok: dist <= threshold || nw.includes(q) }
+    })
+    .filter(x => x.ok)
+    .sort((a, b) => a.score - b.score)
+  return [...new Set(scored.map(x => x.w))].slice(0, limit)
+}
+
+/* ══ Icons ══════════════════════════════════════════ */
+const IC = {
+  Search:   (p:{size?:number,color?:string}) => <svg width={p.size??16} height={p.size??16} viewBox="0 0 24 24" fill="none" stroke={p.color??'currentColor'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Home:     () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Docs:     () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+  Settings: () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  Logout:   () => <svg className={s.navIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  Menu:     () => <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  Eye:      () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
+  Download: () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  Close:    () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Bell:     () => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+}
+
+/* ══ Badge ══════════════════════════════════════════ */
+function Badge({ label }: { label: string }) {
   const l = label.toLowerCase()
   let cls = s.badge + ' '
-  if (['pdf','png','jpg','webp'].includes(l)) cls += s.bPdf
-  else if (['as1','as2','as3','l1','l2','l3','m1','m2'].includes(l)) cls += s.bClass
-  else if (['cours','td','tp','examen','corrigé','devoir'].includes(l)) cls += s.bType
-  else if (l === 'publié') cls += s.bPublished
-  else if (l === 'brouillon') cls += s.bDraft
-  else cls += s.bOther
+  if (['pdf','png','jpg','webp'].includes(l)) cls += s.badgePdf
+  else if (l.match(/^(as|l|m|ing)\d/i)) cls += s.badgeClass
+  else if (['cours','td','tp','examen','corrigé','devoir','corrige','iidcu','word'].includes(l)) cls += s.badgeType
+  else cls += s.badgeDraft
   return <span className={cls}>{label}</span>
 }
 
-export default function DashboardPage() {
-  const router = useRouter()
-  const [profile, setProfile]       = useState<UserProfile | null>(null)
-  const [nav, setNav]               = useState('home')
-  const [sideOpen, setSideOpen]     = useState(false)
-  const [query, setQuery]           = useState('')
-  const [docs, setDocs]             = useState<Document[]>([])
-  const [count, setCount]           = useState(0)
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [loading, setLoading]       = useState(false)
-  const [initLoading, setInitLoading] = useState(true)
-  const [searched, setSearched]     = useState(false)
+/* ══ Preview Modal ══════════════════════════════════ */
+function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+  const [url, setUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  // Charger le profil et les documents initiaux
   useEffect(() => {
-    const cached = getProfile()
-    if (cached) setProfile(cached)
-    else {
-      apiMe().then(p => setProfile(p)).catch(() => router.push('/auth/login'))
-    }
-    // Charger les docs de la filière de l'utilisateur
-    loadDocs({})
-  }, [router])
+    apiGetDocumentUrl(doc.id, 'preview')
+      .then(r => setUrl(r.url))
+      .catch(() => setError('Impossible de charger le fichier.'))
+      .finally(() => setLoading(false))
+  }, [doc.id])
 
-  const loadDocs = useCallback(async (filters: Parameters<typeof apiGetDocuments>[0]) => {
-    setInitLoading(true)
+  const handleDownload = async () => {
     try {
-      const data = await apiGetDocuments(filters)
-      setDocs(data.results)
-      setCount(data.count)
-      if (data.suggestions) setSuggestions(data.suggestions)
-    } catch { /* silencieux */ }
-    finally { setInitLoading(false) }
-  }, [])
-
-  const doSearch = useCallback(async (q: string) => {
-    setLoading(true); setSuggestions([]); setSearched(true)
-    try {
-      // Filtre automatique par classe du profil si disponible
-      const filters: Parameters<typeof apiGetDocuments>[0] = {}
-      if (q.trim()) filters.search = q.trim()
-      if (profile?.class_id) filters.class_id = profile.class_id
-      const data = await apiGetDocuments(filters)
-      setDocs(data.results); setCount(data.count)
-      if (data.suggestions) setSuggestions(data.suggestions)
-    } catch { setDocs([]); setCount(0) }
-    finally { setLoading(false) }
-  }, [profile])
-
-  const handleLogout = async () => {
-    await apiLogout()
-    router.push('/auth/login')
+      const r = await apiGetDocumentUrl(doc.id, 'download')
+      const a = document.createElement('a')
+      a.href = r.url; a.download = r.file_name
+      document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    } catch { alert('Impossible de télécharger le fichier.') }
   }
 
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-    : (profile?.email?.[0] ?? '?').toUpperCase()
+  const isPdf = doc.mime_type === 'application/pdf'
+  const isImg = doc.mime_type?.startsWith('image/')
 
-  const NAV = [
-    { id:'home',      label:'Accueil',           icon:'Home',    section:'NAVIGATION' },
-    { id:'docs',      label:'Tous les documents', icon:'Docs',    section:null         },
-    { id:'settings',  label:'Paramètres',         icon:'Settings',section:'MON COMPTE' },
-  ]
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.75)',
+      display:'flex', flexDirection:'column', animation:'fadeIn 0.2s ease' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}}`}</style>
+      <div style={{ background:'#111827', padding:'12px 20px', display:'flex',
+        alignItems:'center', gap:12, borderBottom:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
+        <div style={{flex:1, minWidth:0}}>
+          <div style={{fontSize:14, fontWeight:700, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{doc.title}</div>
+          <div style={{fontSize:11, color:'rgba(255,255,255,0.5)', marginTop:2}}>{doc.file_name}{doc.file_size ? ` · ${(doc.file_size/1024).toFixed(0)} Ko` : ''}</div>
+        </div>
+        <div style={{display:'flex', gap:8}}>
+          <button onClick={handleDownload} style={{display:'flex', alignItems:'center', gap:7,
+            padding:'8px 16px', background:'#2563eb', color:'#fff',
+            border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer'}}>
+            <IC.Download/> Télécharger
+          </button>
+          <button onClick={onClose} style={{width:36, height:36, background:'rgba(255,255,255,0.1)',
+            border:'1px solid rgba(255,255,255,0.2)', borderRadius:8, color:'#fff',
+            display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer'}}>
+            <IC.Close/>
+          </button>
+        </div>
+      </div>
+      <div style={{flex:1, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', padding:16}}>
+        {loading && <div style={{color:'rgba(255,255,255,0.7)', textAlign:'center'}}><div style={{fontSize:32, marginBottom:12}}>⏳</div><p>Chargement…</p></div>}
+        {error  && <div style={{color:'#fca5a5', textAlign:'center'}}><div style={{fontSize:32, marginBottom:12}}>⚠️</div><p>{error}</p></div>}
+        {url && (isImg
+          ? <img src={url} alt={doc.title} style={{maxWidth:'100%', maxHeight:'100%', objectFit:'contain', borderRadius:8}}/>
+          : isPdf
+            ? <iframe src={url} style={{width:'100%', height:'100%', border:'none', borderRadius:8}} title={doc.title}/>
+            : <div style={{color:'#fff', textAlign:'center'}}>
+                <div style={{fontSize:48, marginBottom:16}}>📎</div>
+                <div style={{fontSize:15, fontWeight:700, marginBottom:20}}>{doc.file_name}</div>
+                <button onClick={handleDownload} style={{padding:'10px 24px', background:'#2563eb', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:'pointer'}}>⬇ Télécharger</button>
+              </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ══ Document Card ══════════════════════════════════ */
+function DocCard({ doc, onPreview, onDownload }: {
+  doc: Document; onPreview: (d: Document) => void; onDownload: (d: Document) => void
+}) {
+  const teacherName = doc.teachers[0]?.name ?? doc.uploaded_by ?? '—'
+  const teacherInit = teacherName.split(' ').map((w: string) => w[0]).join('').slice(0,2).toUpperCase()
+  return (
+    <div className={s.docCard}>
+      <div className={s.docCardTop}>
+        <div className={s.docCardBadges}>
+          {doc.badges.slice(0,4).map((b: string) => <Badge key={b} label={b}/>)}
+        </div>
+        <div className={s.docCardTitle}>{doc.title}</div>
+        {doc.description && <div className={s.docCardDesc}>{doc.description}</div>}
+      </div>
+      <div className={s.docCardMeta}>
+        <div className={s.docCardTeacher}>
+          <div className={s.teacherAvatar}>{teacherInit}</div>
+          <span style={{overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{teacherName}</span>
+        </div>
+        <div className={s.docCardActions}>
+          <button className={s.docBtn} onClick={() => onPreview(doc)} title="Visualiser"><IC.Eye/></button>
+          <button className={s.docBtn} onClick={() => onDownload(doc)} title="Télécharger" style={{color:'var(--primary)'}}><IC.Download/></button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ══ Page principale ════════════════════════════════ */
+export default function DashboardPage() {
+  const router = useRouter()
+  const [profile,    setProfile]    = useState<UserProfile | null>(null)
+  const [docs,       setDocs]       = useState<Document[]>([])
+  const [count,      setCount]      = useState(0)
+  const [loading,    setLoading]    = useState(false)
+  const [initDone,   setInitDone]   = useState(false)
+  const [classes,    setClasses]    = useState<ClassItem[]>([])
+  const [subjects,   setSubjects]   = useState<SubjectItem[]>([])
+  const [years,      setYears]      = useState<AcademicYear[]>([])
+  const [docTypes,   setDocTypes]   = useState<DocumentType[]>([])
+  const [teachers,   setTeachers]   = useState<Teacher[]>([])
+  const [corpus,     setCorpus]     = useState<string[]>([])
+  const [filters, setFilters] = useState({ class_id:'', subject_id:'', year_id:'', type_id:'', teacher_id:'' })
+  const [query,      setQuery]      = useState('')
+  const [suggestions, setSugg]      = useState<string[]>([])
+  const [showSugg,   setShowSugg]   = useState(false)
+  const [sideOpen,   setSideOpen]   = useState(false)
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const cached = getProfile()
+    if (cached) {
+      setProfile(cached)
+      if (cached.class_id) setFilters(f => ({...f, class_id: cached.class_id ?? ''}))
+    } else {
+      apiMe().then(p => {
+        setProfile(p)
+        if (p.class_id) setFilters(f => ({...f, class_id: p.class_id ?? ''}))
+      }).catch(() => router.push('/auth'))
+    }
+    Promise.all([apiGetClasses(), apiGetSubjects(), apiGetYears(), apiGetDocTypes(), apiGetTeachers()])
+      .then(([c, su, y, dt, te]) => {
+        setClasses(c); setSubjects(su); setYears(y); setDocTypes(dt); setTeachers(te)
+        const tokens = new Set<string>()
+        c.forEach(x => { tokens.add(x.label); tokens.add(x.code) })
+        su.forEach(x => tokens.add(x.name))
+        y.forEach(x => tokens.add(x.label))
+        dt.forEach(x => tokens.add(x.label))
+        te.forEach(x => tokens.add(x.full_name))
+        setCorpus([...tokens].filter(Boolean))
+      }).catch(console.error)
+  }, [router])
+
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowSugg(false)
+    }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
+  useEffect(() => {
+    if (query.length < 2) { setSugg([]); setShowSugg(false); return }
+    const t = setTimeout(() => {
+      const s = levenshteinSuggest(query, corpus, 7)
+      setSugg(s); setShowSugg(s.length > 0)
+    }, 180)
+    return () => clearTimeout(t)
+  }, [query, corpus])
+
+  const loadDocs = useCallback(async (q: string, f: typeof filters) => {
+    setLoading(true)
+    try {
+      const data = await apiGetDocuments({
+        search: q || undefined,
+        class_id: f.class_id || undefined,
+        subject_id: f.subject_id || undefined,
+        academic_year_id: f.year_id || undefined,
+        document_type_id: f.type_id || undefined,
+        teacher_id: f.teacher_id || undefined,
+      })
+      setDocs(data.results); setCount(data.count)
+      if (data.results.length > 0) {
+        setCorpus(prev => {
+          const extra = data.results.flatMap((d: Document) => [d.title, ...(d.description ? [d.description] : [])])
+          return [...new Set([...prev, ...extra])]
+        })
+      }
+    } catch { setDocs([]); setCount(0) }
+    finally { setLoading(false); setInitDone(true) }
+  }, [])
+
+  useEffect(() => {
+    if (!profile) return
+    loadDocs(query, filters)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, profile])
+
+  const doSearch = () => { setShowSugg(false); loadDocs(query, filters) }
+  const pickSuggestion = (w: string) => { setQuery(w); setShowSugg(false); loadDocs(w, filters) }
+  const clearSearch = () => { setQuery(''); setSugg([]); loadDocs('', filters) }
+  const setFilter = (k: string, v: string) => {
+    const next = { ...filters, [k]: v }
+    if (k === 'class_id') next.subject_id = ''
+    setFilters(next)
+  }
+  const clearFilters = () => setFilters({ class_id: profile?.class_id ?? '', subject_id:'', year_id:'', type_id:'', teacher_id:'' })
+  const handleDownload = async (doc: Document) => {
+    try {
+      const r = await apiGetDocumentUrl(doc.id, 'download')
+      const a = document.createElement('a'); a.href = r.url; a.download = r.file_name
+      document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    } catch { alert('Impossible de télécharger le fichier.') }
+  }
+  const handleLogout = async () => { await apiLogout(); router.push('/auth') }
+
+  const initials = (profile?.full_name ?? profile?.email ?? '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+  const filteredSubs = filters.class_id ? subjects.filter(su => su.class_id === filters.class_id || !su.class_id) : subjects
+  const activeFiltersCount = Object.values(filters).filter(v => v !== '').length
 
   return (
     <div className={s.shell}>
+      {previewDoc && <PreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)}/>}
       <div className={`${s.overlay} ${!sideOpen ? s.overlayHidden : ''}`} onClick={() => setSideOpen(false)}/>
 
       {/* ══ SIDEBAR ══ */}
       <aside className={`${s.sidebar} ${sideOpen ? s.sidebarOpen : ''}`}>
         <div className={s.sidebarTop}>
           <div className={s.brandRow}>
-            {/* LOGO : public/logo.png · 38×38px */}
-            <Image src="/logo.png" alt="ENSEA DSC" width={38} height={38} className={s.brandLogo} priority />
-            <div className={s.brandText}>
-              <span className={s.brandName}>G<span>-</span>baki</span>
+           <Image src="/logo.png" alt="ENSEA DSC" width={38} height={38}
+              style={{objectFit:'contain', flexShrink:0}} priority/>
+            <div className={s.brandNames}>
+              <span className={s.brandApp}>G<span>-baki</span></span>
               <span className={s.brandSub}>ENSEA Data Science Club</span>
             </div>
           </div>
-          <div className={s.userChip}>
-            <div className={s.userAvatar}>{initials}</div>
-            <div className={s.userChipInfo}>
-              <div className={s.userChipName}>{profile?.full_name ?? profile?.email ?? '…'}</div>
-              <div className={s.userChipRole}>
-                {profile?.class_label ?? profile?.class_code ?? 'Étudiant'}
-              </div>
+          <div className={s.sidebarProfile}>
+            <div className={s.sidebarAvatar}>{initials}</div>
+            <div style={{minWidth:0}}>
+              <div className={s.sidebarName}>{profile?.full_name ?? profile?.email ?? '—'}</div>
+              <div className={s.sidebarRole}>{profile?.class_code ?? 'Étudiant'}</div>
             </div>
           </div>
         </div>
-
         <nav className={s.nav}>
-          {NAV.map((item, i) => {
-            const prev = NAV[i-1]
-            const showSection = item.section && item.section !== (prev?.section ?? '')
-            const IconComp = Icons[item.icon as keyof typeof Icons]
-            return (
-              <div key={item.id}>
-                {showSection && <p className={s.navSection}>{item.section}</p>}
-                <button className={`${s.navItem} ${nav===item.id ? s.navItemActive : ''}`}
-                  onClick={() => { setNav(item.id); setSideOpen(false) }}>
-                  <IconComp/>{item.label}
-                </button>
-              </div>
-            )
-          })}
+          <div className={s.navSection}>Navigation</div>
+          <button className={`${s.navItem} ${s.navItemActive}`}><IC.Home/>Accueil</button>
+          <button className={s.navItem} onClick={() => {
+            // Affiche tous les docs de la filière (class_id du profil, sans autres filtres)
+            clearSearch()
+            setFilters({ class_id: profile?.class_id ?? '', subject_id:'', year_id:'', type_id:'', teacher_id:'' })
+          }}><IC.Docs/>Tous les documents</button>
+          <div className={s.navSection}>Mon compte</div>
+          <button className={s.navItem} onClick={() => router.push('/onboarding')}><IC.Settings/>Paramètres</button>
         </nav>
-
         <div className={s.sidebarBottom}>
-          <button className={s.logoutBtn} onClick={handleLogout}>
-            <Icons.Logout/>Se déconnecter
-          </button>
+          <button className={s.logoutFull} onClick={handleLogout}><IC.Logout/> Se déconnecter</button>
         </div>
       </aside>
 
       {/* ══ MAIN ══ */}
       <div className={s.main}>
         <header className={s.topbar}>
-          <button className={s.iconBtn} style={{ display:'flex' }} onClick={() => setSideOpen(!sideOpen)}>
-            <Icons.Menu/>
-          </button>
-          <div className={s.topbarGreeting}>
-            <div className={s.topbarGreetingTxt}>
-              Bonjour{profile?.full_name ? `, ${profile.full_name.split(' ')[0]}` : ''} 👋
-              {profile?.class_label && <span> — {profile.class_label}</span>}
+          <button className={s.menuToggle} onClick={() => setSideOpen(!sideOpen)}><IC.Menu/></button>
+          <div className={s.topbarLeft}>
+            <div className={s.topbarTitle}>
+              Bonjour, {profile?.full_name ?? profile?.email ?? '—'}
+              {profile?.class_code && <span> — {profile.class_code}</span>}
             </div>
           </div>
-          <div className={s.topbarRight}>
-            <button className={s.iconBtn}><Icons.Bell/></button>
-            <div className={s.userAvatar} style={{ width:36,height:36,fontSize:12,borderRadius:'50%' }}>{initials}</div>
-          </div>
+          <div className={s.iconBtn}><IC.Bell/></div>
         </header>
 
         <main className={s.content}>
-
-          {/* Contexte filière */}
-          {profile?.class_label && (
-            <div className={s.contextBar}>
-              📚 Documents filtrés pour : <span>{profile.class_label}</span>
-              <button className={s.contextEdit} onClick={() => router.push('/onboarding')}>Modifier</button>
+          {/* ── Recherche ── */}
+          <div className={s.searchSection} ref={searchRef}>
+            <div className={s.searchTitle}>Que cherchez-vous ?</div>
+            <div className={s.searchHint}>
+              Tapez un mot-clé, matière, enseignant, type de document. Accepte les abréviations : <em>td, tp, proba, exam, corrigé…</em>
             </div>
-          )}
-
-          {/* Recherche */}
-          <div className={s.searchBlock}>
-            <h2 className={s.searchHeading}>Que cherchez-vous ?</h2>
-            <p className={s.searchSubheading}>
-              Tapez un mot-clé, matière, enseignant, type de document.
-              Accepte les abréviations : <em>td, tp, proba, exam, corrigé…</em>
-            </p>
-            <div className={s.searchRow}>
-              <div className={s.searchInputWrap}>
-                <Icons.Search/>
-                <input className={s.searchInput}
-                  placeholder="Ex : cours probabilités, examen estimation, TP stats…"
+            <div style={{position:'relative'}}>
+              <div className={s.searchInputRow}>
+                <div className={s.searchIcon}><IC.Search size={17} color="#94a3b8"/></div>
+                <input
+                  className={s.searchInput}
+                  placeholder="Ex: cours probabilités, examen estimation, TP stats..."
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && doSearch(query)}
+                  onKeyDown={e => { if (e.key === 'Enter') doSearch() }}
+                  onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+                  autoComplete="off"
                 />
+                {query && <button onClick={clearSearch} className={s.clearBtn}><IC.Close/></button>}
+                <button className={s.searchBtn} onClick={doSearch} disabled={loading}>
+                  <IC.Search size={15}/> Rechercher
+                </button>
               </div>
-              <button className={s.searchBtn} onClick={() => doSearch(query)} disabled={loading}>
-                {loading ? '⏳' : <><Icons.Search/> Rechercher</>}
-              </button>
+              {showSugg && suggestions.length > 0 && (
+                <div className={s.autocompleteDropdown}>
+                  {suggestions.map(sug => (
+                    <div key={sug} className={s.autocompleteItem} onClick={() => pickSuggestion(sug)}>
+                      <IC.Search size={12}/> {sug}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {suggestions.length > 0 && (
-              <div className={s.suggestions}>
-                <span className={s.suggLabel}>💡 Vouliez-vous dire :</span>
-                {suggestions.map(w => (
-                  <button key={w} className={s.suggChip} onClick={() => { setQuery(w); doSearch(w) }}>{w}</button>
-                ))}
-              </div>
+          </div>
+
+          {/* ── Filtres ── */}
+          <div className={s.filtersSection}>
+            <div className={s.filterGroup}>
+              <label className={s.filterLabel}>Matière</label>
+              <select className={s.filterSelect} value={filters.subject_id} onChange={e => setFilter('subject_id', e.target.value)}>
+                <option value="">Toutes</option>
+                {filteredSubs.map(su => <option key={su.id} value={su.id}>{su.name}</option>)}
+              </select>
+            </div>
+            <div className={s.filterGroup}>
+              <label className={s.filterLabel}>Enseignant</label>
+              <select className={s.filterSelect} value={filters.teacher_id} onChange={e => setFilter('teacher_id', e.target.value)}>
+                <option value="">Tous</option>
+                {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
+              </select>
+            </div>
+            <div className={s.filterGroup}>
+              <label className={s.filterLabel}>Année</label>
+              <select className={s.filterSelect} value={filters.year_id} onChange={e => setFilter('year_id', e.target.value)}>
+                <option value="">Toutes</option>
+                {years.map(y => <option key={y.id} value={y.id}>{y.label}</option>)}
+              </select>
+            </div>
+            <div className={s.filterGroup}>
+              <label className={s.filterLabel}>Type</label>
+              <select className={s.filterSelect} value={filters.type_id} onChange={e => setFilter('type_id', e.target.value)}>
+                <option value="">Tous</option>
+                {docTypes.map(dt => <option key={dt.id} value={dt.id}>{dt.label}</option>)}
+              </select>
+            </div>
+            {activeFiltersCount > 0 && (
+              <button className={s.resetBtn} onClick={clearFilters}><IC.Close/> Réinitialiser</button>
             )}
           </div>
 
-          {/* Résultats */}
-          <div>
-            <div className={s.resultsBar}>
-              <div className={s.resultsTitle}>{searched ? 'Résultats' : 'Documents de votre filière'}</div>
-              <div className={s.resultsMeta}>
-                {initLoading ? 'Chargement…' : `${count} document${count > 1 ? 's' : ''}${searched && query ? ` pour «\u00a0${query}\u00a0»` : ''}`}
-              </div>
-            </div>
+          {/* ── Résultats ── */}
+          <div className={s.resultsHeader}>
+            <div className={s.resultsTitle}>Documents de votre filière</div>
+            <div className={s.resultsMeta}>{loading ? 'Chargement…' : `${count} document${count !== 1 ? 's' : ''}`}</div>
           </div>
 
-          {initLoading ? (
-            <div style={{ textAlign:'center', padding:'60px 20px', color:'var(--ink-muted)' }}>
-              <div style={{ fontSize:32, marginBottom:12 }}>⏳</div>
-              <p>Chargement des documents…</p>
-            </div>
-          ) : docs.length === 0 && searched ? (
+          {!initDone || loading ? (
+            <div className={s.empty}><div className={s.emptyIcon}>⏳</div><div className={s.emptyTitle}>Chargement des documents…</div></div>
+          ) : docs.length === 0 ? (
             <div className={s.empty}>
-              <div className={s.emptyIcon}>🔍</div>
-              <div className={s.emptyTitle}>Aucun résultat</div>
-              <div className={s.emptySub}>Essayez un autre terme. Notre moteur comprend les abréviations comme «&nbsp;proba&nbsp;», «&nbsp;td&nbsp;», «&nbsp;exam&nbsp;».</div>
+              <div className={s.emptyIcon}>{query ? '🔍' : '📭'}</div>
+              <div className={s.emptyTitle}>{query ? 'Aucun résultat' : 'Aucun document disponible'}</div>
+              <div className={s.emptySub}>{query ? 'Essayez un autre terme ou vérifiez vos filtres.' : 'Les documents apparaîtront ici une fois publiés.'}</div>
             </div>
           ) : (
             <div className={s.docsGrid}>
-              {docs.map(doc => {
-                const initials2 = (doc.teachers[0]?.name ?? doc.uploaded_by ?? '??').split(' ').map((w:string)=>w[0]).join('').slice(0,2).toUpperCase()
-                return (
-                  <div className={s.docCard} key={doc.id}>
-                    <div className={s.docCardBody}>
-                      <div className={s.docBadges}>{doc.badges.slice(0,3).map(b => <BadgeEl key={b} label={b}/>)}</div>
-                      <div className={s.docCardTitle}>{doc.title}</div>
-                      {doc.description && <div className={s.docCardDesc}>{doc.description}</div>}
-                    </div>
-                    <div className={s.docCardFoot}>
-                      <div className={s.docTeacher}>
-                        <div className={s.teacherAvt}>{initials2}</div>
-                        <span className={s.teacherName}>{doc.teachers[0]?.name ?? doc.uploaded_by}</span>
-                      </div>
-                      <div className={s.docActions}>
-                        {doc.previewable && (
-                          <a href={doc.clickable_link ?? '#'} target="_blank" rel="noreferrer" className={s.docBtn} title="Prévisualiser"><Icons.Eye/></a>
-                        )}
-                        <a href={doc.clickable_link ?? '#'} target="_blank" rel="noreferrer" className={s.docBtn} title="Télécharger"><Icons.Download/></a>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+              {docs.map(doc => <DocCard key={doc.id} doc={doc} onPreview={setPreviewDoc} onDownload={handleDownload}/>)}
             </div>
           )}
-
         </main>
       </div>
     </div>

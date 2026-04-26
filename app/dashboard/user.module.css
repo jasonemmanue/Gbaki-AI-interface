@@ -382,6 +382,113 @@
 .subjectDocs { font-size: 11.5px; font-weight: 500; color: var(--text-muted); }
 .subjectArrow { color: var(--text-light); font-size: 14px; }
 
+/* ── Sidebar profile block ────────────────────────── */
+.sidebarProfile {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--surface-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+.sidebarAvatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff; font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sidebarName { font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebarRole { font-size: 11px; color: var(--text-muted); }
+
+/* ── Logout full-width ────────────────────────────── */
+.logoutFull {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.18s;
+}
+.logoutFull:hover { border-color: var(--error); color: var(--error); background: #fef2f2; }
+
+/* ── Topbar left ──────────────────────────────────── */
+.topbarLeft { flex: 1; }
+
+/* ── Search section ───────────────────────────────── */
+.searchSection {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 22px 24px 20px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s ease both;
+}
+.searchTitle {
+  font-size: 17px; font-weight: 800; color: var(--text);
+  margin-bottom: 4px;
+}
+.searchHint {
+  font-size: 12.5px; color: var(--text-muted);
+  margin-bottom: 14px; line-height: 1.5;
+}
+.searchHint em { font-style: normal; color: var(--primary); font-weight: 600; }
+.searchIcon { display: flex; align-items: center; padding: 0 4px; flex-shrink: 0; }
+.clearBtn {
+  background: none; border: none; color: #94a3b8;
+  cursor: pointer; padding: 0 6px; display: flex; align-items: center;
+  flex-shrink: 0;
+}
+.clearBtn:hover { color: #64748b; }
+
+/* ── Autocomplete dropdown ────────────────────────── */
+.autocompleteDropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.13);
+  z-index: 200; overflow: hidden;
+}
+.autocompleteItem {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer; font-size: 13.5px; color: #374151;
+  transition: background 0.12s;
+}
+.autocompleteItem:hover { background: #f0f7ff; color: var(--primary); }
+
+/* ── Filters section ──────────────────────────────── */
+.filtersSection {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s 0.05s ease both;
+}
+.filterGroup { display: flex; flex-direction: column; gap: 5px; min-width: 150px; }
+.filterLabel {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em;
+}
+.filterSelect {
+  border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px;
+  background: #fff; color: var(--text); outline: none;
+  transition: border-color 0.15s;
+}
+.filterSelect:focus { border-color: var(--primary); }
+.resetBtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 14px;
+  background: #fef2f2; border: 1.5px solid #fecaca;
+  border-radius: 8px; font-size: 12px; font-weight: 700;
+  color: #dc2626; cursor: pointer; align-self: flex-end;
+  transition: all 0.15s;
+}
+.resetBtn:hover { background: #fee2e2; }
+
 /* ── Animation ────────────────────────────────────── */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
