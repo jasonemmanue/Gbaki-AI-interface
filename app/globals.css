@@ -1,5 +1,6 @@
 /*
  * GBAKI-Searcher — globals.css
+ * ✅ Ajout : variables dark mode via [data-theme="dark"]
  */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -58,7 +59,6 @@
 
   /* Auth page variables */
   --input-bg:  #f8fafc;
-  --text:      #111827;
 }
 
 html, body {
@@ -67,6 +67,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 a { color: var(--primary); text-decoration: none; }

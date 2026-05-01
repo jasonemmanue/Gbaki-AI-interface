@@ -1,9 +1,11 @@
 /*
  * GBAKI-Searcher — app/layout.tsx
  * Stockage : gbaki-searcher/app/layout.tsx
+ * ✅ Ajout : ThemeProvider + LangProvider
  */
 import type { Metadata } from 'next'
 import './globals.css'
+import { LangProvider } from '../context/LangContext'
 
 export const metadata: Metadata = {
   title: 'GBAKI-Searcher — Manuel numérique ENSEA',
@@ -25,7 +27,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <LangProvider>
+            {children}
+          </LangProvider>
+      </body>
     </html>
   )
 }

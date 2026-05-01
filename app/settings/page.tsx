@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import s from './settings.module.css'
+import { useLang } from '../../context/LangContext'
 import {
   apiGetClasses, apiUpdateProfile, apiMe,
   getProfile, saveProfile, saveToken, clearAuth,
@@ -25,11 +26,7 @@ function getBadgeClass(code: string, active: boolean): string {
   return s.badgeING
 }
 
-/* Code affiché dans le badge — on utilise directement c.code tel quel,
-   en tronquant à 6 chars max pour tenir dans 44px si besoin */
 function shortCode(code: string): string {
-  // code vient de la DB : "AS1", "AS2", "ISE 1 M", "ISE 2", "IPS 1 E" etc.
-  // On retire juste les underscores éventuels et on garde 7 chars max
   const clean = code.replace(/_/g, ' ').trim()
   return clean.length <= 7 ? clean : clean.slice(0, 7)
 }
@@ -43,6 +40,7 @@ function EyeIcon({ open }: { open: boolean }) {
 /* ══════════════════════════════════════════════════════════ */
 export default function SettingsPage() {
   const router = useRouter()
+  const { t, lang, toggleLang } = useLang()
   const [tab, setTab] = useState<'class' | 'account'>('class')
 
   // Profil
@@ -51,16 +49,16 @@ export default function SettingsPage() {
   const [classes,    setClasses]    = useState<ClassItem[]>([])
 
   // Onglet Classe
-  const [selected,   setSelected]   = useState('')
+  const [selected,    setSelected]   = useState('')
   const [savingClass, setSavingClass] = useState(false)
-  const [classMsg,   setClassMsg]   = useState<{type:'ok'|'err', text:string} | null>(null)
+  const [classMsg,    setClassMsg]   = useState<{type:'ok'|'err', text:string} | null>(null)
 
   // Onglet Compte
-  const [newEmail,   setNewEmail]   = useState('')
-  const [newPass,    setNewPass]    = useState('')
-  const [showPass,   setShowPass]   = useState(false)
-  const [savingAcc,  setSavingAcc]  = useState(false)
-  const [accMsg,     setAccMsg]     = useState<{type:'ok'|'err', text:string} | null>(null)
+  const [newEmail,  setNewEmail]  = useState('')
+  const [newPass,   setNewPass]   = useState('')
+  const [showPass,  setShowPass]  = useState(false)
+  const [savingAcc, setSavingAcc] = useState(false)
+  const [accMsg,    setAccMsg]    = useState<{type:'ok'|'err', text:string} | null>(null)
 
   useEffect(() => {
     apiGetClasses().then(setClasses).catch(console.error)
@@ -81,12 +79,11 @@ export default function SettingsPage() {
     if (!selected || !profileId) return
     setSavingClass(true); setClassMsg(null)
     try {
-      const updated = await apiUpdateProfile(profileId, { class_id: selected })
-      // Recharger le profil complet depuis /me pour avoir class_code et class_label à jour
+      await apiUpdateProfile(profileId, { class_id: selected })
       const fresh = await apiMe()
       saveProfile(fresh)
       setProfile(fresh)
-      setClassMsg({ type: 'ok', text: 'Classe mise à jour ! Redirection…' })
+      setClassMsg({ type: 'ok', text: t('settingsClassCurrent') + ' ✓  Redirection…' })
       setTimeout(() => router.push('/dashboard'), 1500)
     } catch (e: unknown) {
       setClassMsg({ type: 'err', text: (e as Error).message })
@@ -96,12 +93,11 @@ export default function SettingsPage() {
   /* ── Changer de compte institutionnel ──────────── */
   const handleSaveAccount = async () => {
     setAccMsg(null)
-    if (!newEmail.trim()) { setAccMsg({ type:'err', text:'Entrez le nouvel email institutionnel.' }); return }
-    if (!newPass.trim())  { setAccMsg({ type:'err', text:'Entrez le mot de passe du nouveau compte.' }); return }
+    if (!newEmail.trim()) { setAccMsg({ type:'err', text: t('settingsAccountErrEmail') }); return }
+    if (!newPass.trim())  { setAccMsg({ type:'err', text: t('settingsAccountErrPass') }); return }
 
     setSavingAcc(true)
     try {
-      // 1. Tenter de se connecter avec le nouveau compte
       const r = await fetch(`${API}/auth/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,11 +106,10 @@ export default function SettingsPage() {
       const data = await r.json()
       if (!r.ok) throw new Error(data.error ?? 'Identifiants incorrects pour ce compte.')
 
-      // 2. Connexion réussie → sauvegarder le nouveau token et profil
       clearAuth()
       saveToken(data.token)
       saveProfile(data.profile)
-      setAccMsg({ type: 'ok', text: 'Compte changé avec succès ! Redirection…' })
+      setAccMsg({ type: 'ok', text: t('settingsAccountSwitch') + ' ✓  Redirection…' })
       setTimeout(() => router.push('/dashboard'), 1500)
     } catch (e: unknown) {
       setAccMsg({ type: 'err', text: (e as Error).message })
@@ -128,9 +123,29 @@ export default function SettingsPage() {
       {/* Header */}
       <div className={s.header}>
         <button className={s.backBtn} onClick={() => router.push('/dashboard')}>
-          ← Retour
+          {t('settingsBack')}
         </button>
-        <span className={s.headerTitle}>Paramètres</span>
+        <span className={s.headerTitle}>{t('settingsTitle')}</span>
+
+        {/* Bouton langue */}
+        <button
+          onClick={toggleLang}
+          title={lang === 'fr' ? 'Switch to English' : 'Passer en français'}
+          style={{
+            marginLeft: 'auto',
+            fontWeight: 700,
+            fontSize: 12,
+            letterSpacing: '0.03em',
+            padding: '6px 12px',
+            background: 'rgba(37,99,235,0.1)',
+            border: '1px solid rgba(37,99,235,0.3)',
+            borderRadius: 8,
+            cursor: 'pointer',
+            color: 'var(--primary, #2563eb)',
+          }}
+        >
+          {lang === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
+        </button>
       </div>
 
       <div className={s.card}>
@@ -140,23 +155,21 @@ export default function SettingsPage() {
             className={`${s.tab} ${tab === 'class' ? s.tabActive : ''}`}
             onClick={() => setTab('class')}
           >
-            🎓 Ma classe
+            {t('settingsTabClass')}
           </button>
           <button
             className={`${s.tab} ${tab === 'account' ? s.tabActive : ''}`}
             onClick={() => setTab('account')}
           >
-            👤 Mon compte
+            {t('settingsTabAccount')}
           </button>
         </div>
 
         {/* ── Onglet Classe ── */}
         {tab === 'class' && (
           <div className={s.panel}>
-            <div className={s.panelTitle}>Changer de classe</div>
-            <p className={s.panelSub}>
-              Sélectionnez votre classe. Votre dashboard affichera les documents correspondants.
-            </p>
+            <div className={s.panelTitle}>{t('settingsClassTitle')}</div>
+            <p className={s.panelSub}>{t('settingsClassSub')}</p>
 
             {classMsg && (
               <div className={classMsg.type === 'ok' ? s.success : s.error}>
@@ -174,7 +187,6 @@ export default function SettingsPage() {
                     className={`${s.classBtn} ${active ? s.classBtnActive : ''}`}
                     onClick={() => setSelected(c.id)}
                   >
-                    {/* Badge colorié avec code complet lisible */}
                     <div className={`${s.classBadge} ${getBadgeClass(c.code, active)}`}>
                       {abbr}
                     </div>
@@ -193,7 +205,11 @@ export default function SettingsPage() {
               onClick={handleSaveClass}
               disabled={savingClass || !selected || selected === profile?.class_id}
             >
-              {savingClass ? 'Enregistrement…' : selected === profile?.class_id ? 'Classe actuelle' : `Choisir ${currentClass?.code ?? ''}`}
+              {savingClass
+                ? t('settingsClassSaving')
+                : selected === profile?.class_id
+                  ? t('settingsClassCurrent')
+                  : `${t('settingsClassChoose')} ${currentClass?.code ?? ''}`}
             </button>
           </div>
         )}
@@ -201,11 +217,8 @@ export default function SettingsPage() {
         {/* ── Onglet Compte ── */}
         {tab === 'account' && (
           <div className={s.panel}>
-            <div className={s.panelTitle}>Changer de compte</div>
-            <p className={s.panelSub}>
-              Vous avez un nouvel email institutionnel ? Connectez-vous avec le compte déjà inscrit
-              sur GBAKI pour y accéder. Votre session actuelle sera remplacée.
-            </p>
+            <div className={s.panelTitle}>{t('settingsAccountTitle')}</div>
+            <p className={s.panelSub}>{t('settingsAccountSub')}</p>
 
             {accMsg && (
               <div className={accMsg.type === 'ok' ? s.success : s.error}>
@@ -215,7 +228,7 @@ export default function SettingsPage() {
 
             {/* Compte actuel (lecture seule) */}
             <div className={s.field}>
-              <label className={s.label}>Compte actuel</label>
+              <label className={s.label}>{t('settingsAccountCurrent')}</label>
               <input
                 className={s.input}
                 type="email"
@@ -227,25 +240,25 @@ export default function SettingsPage() {
             <div className={s.divider}/>
 
             <div className={s.field}>
-              <label className={s.label}>Nouvel email institutionnel</label>
+              <label className={s.label}>{t('settingsAccountNewEmail')}</label>
               <input
                 className={s.input}
                 type="email"
-                placeholder="nouveau@ensea.edu.ci"
+                placeholder={t('settingsAccountEmailPlaceholder')}
                 value={newEmail}
                 onChange={e => setNewEmail(e.target.value)}
                 autoComplete="off"
               />
-              <div className={s.hint}>Ce compte doit déjà être inscrit sur GBAKI.</div>
+              <div className={s.hint}>{t('settingsAccountEmailHint')}</div>
             </div>
 
             <div className={s.field}>
-              <label className={s.label}>Mot de passe du nouveau compte</label>
+              <label className={s.label}>{t('settingsAccountNewPass')}</label>
               <div className={s.inputWrap}>
                 <input
                   className={s.input}
                   type={showPass ? 'text' : 'password'}
-                  placeholder="Mot de passe du nouveau compte"
+                  placeholder={t('settingsAccountPassPlaceholder')}
                   value={newPass}
                   onChange={e => setNewPass(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSaveAccount()}
@@ -262,7 +275,7 @@ export default function SettingsPage() {
               onClick={handleSaveAccount}
               disabled={savingAcc}
             >
-              {savingAcc ? 'Vérification…' : 'Basculer vers ce compte'}
+              {savingAcc ? t('settingsAccountSaving') : t('settingsAccountSwitch')}
             </button>
           </div>
         )}

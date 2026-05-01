@@ -1,4 +1,5 @@
 // gbaki-searcher/lib/api.ts
+// ✅ Ajout : apiGetNotificationsToday()
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
 
@@ -81,12 +82,10 @@ export interface Document {
 export interface DocumentsResponse {
   count: number
   results: Document[]
-  suggestions?: string[]
 }
 
 export interface ClassItem {
-  id: string; code: string; label: string
-  cycle: string | null; level_order: number | null
+  id: string; code: string; label: string; cycle: string | null
 }
 
 export interface SubjectItem {
@@ -108,6 +107,20 @@ export interface Teacher {
 
 export interface DownloadResponse {
   url: string; file_name: string; mime_type: string | null
+}
+
+/* ── Notifications ────────────────────────────────── */
+export interface NotificationsToday {
+  count: number
+  date: string
+}
+
+/**
+ * GET /api/notifications/today/
+ * Retourne le nombre de documents publiés aujourd'hui.
+ */
+export async function apiGetNotificationsToday(): Promise<NotificationsToday> {
+  return apiFetch<NotificationsToday>('/notifications/today/')
 }
 
 /* ── Auth ─────────────────────────────────────────── */

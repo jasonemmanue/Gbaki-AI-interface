@@ -1,16 +1,20 @@
 /*
  * gbaki-searcher/app/dashboard/page.tsx
- * Dashboard étudiant — design fidèle à la maquette + recherche Levenshtein
+ * ✅ NOUVELLES FONCTIONNALITÉS :
+ *   1. Notifications cloche — nombre de docs publiés aujourd'hui (disparaît après 24h)
+ *   2. Mode clair/sombre — bouton dans la topbar
+ *   3. Langues FR/EN — bouton dans la topbar
  */
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import s from './user.module.css'
+import { useLang } from '../../context/LangContext'
 import {
   apiGetDocuments, apiLogout, apiMe, apiGetClasses, apiGetSubjects,
   apiGetYears, apiGetDocTypes, apiGetDocumentUrl,
-  apiGetTeachers,
+  apiGetTeachers, apiGetNotificationsToday,
   getProfile,
   type Document, type UserProfile, type ClassItem,
   type SubjectItem, type AcademicYear, type DocumentType, type Teacher,
@@ -50,6 +54,17 @@ function levenshteinSuggest(query: string, corpus: string[], limit = 7): string[
   return [...new Set(scored.map(x => x.w))].slice(0, limit)
 }
 
+/* ══ Helpers notifications ══════════════════════════ */
+const NOTIF_KEY = 'gbaki_notif_seen_date'
+
+function getNotifSeenDate(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(NOTIF_KEY)
+}
+function setNotifSeenDate(date: string) {
+  localStorage.setItem(NOTIF_KEY, date)
+}
+
 /* ══ Icons ══════════════════════════════════════════ */
 const IC = {
   Search:   (p:{size?:number,color?:string}) => <svg width={p.size??16} height={p.size??16} viewBox="0 0 24 24" fill="none" stroke={p.color??'currentColor'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
@@ -76,7 +91,7 @@ function Badge({ label }: { label: string }) {
 }
 
 /* ══ Preview Modal ══════════════════════════════════ */
-function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
+function PreviewModal({ doc, onClose, t }: { doc: Document; onClose: () => void; t: (k: string) => string }) {
   const [url, setUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -84,9 +99,9 @@ function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) 
   useEffect(() => {
     apiGetDocumentUrl(doc.id, 'preview')
       .then(r => setUrl(r.url))
-      .catch(() => setError('Impossible de charger le fichier.'))
+      .catch(() => setError(t('noPreview')))
       .finally(() => setLoading(false))
-  }, [doc.id])
+  }, [doc.id, t])
 
   const handleDownload = async () => {
     try {
@@ -94,7 +109,7 @@ function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) 
       const a = document.createElement('a')
       a.href = r.url; a.download = r.file_name
       document.body.appendChild(a); a.click(); document.body.removeChild(a)
-    } catch { alert('Impossible de télécharger le fichier.') }
+    } catch { alert(t('downloadError')) }
   }
 
   const isPdf = doc.mime_type === 'application/pdf'
@@ -115,7 +130,7 @@ function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) 
           <button onClick={handleDownload} style={{display:'flex', alignItems:'center', gap:7,
             padding:'8px 16px', background:'#2563eb', color:'#fff',
             border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer'}}>
-            <IC.Download/> Télécharger
+            <IC.Download/> {t('download')}
           </button>
           <button onClick={onClose} style={{width:36, height:36, background:'rgba(255,255,255,0.1)',
             border:'1px solid rgba(255,255,255,0.2)', borderRadius:8, color:'#fff',
@@ -125,7 +140,7 @@ function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) 
         </div>
       </div>
       <div style={{flex:1, overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', padding:16}}>
-        {loading && <div style={{color:'rgba(255,255,255,0.7)', textAlign:'center'}}><div style={{fontSize:32, marginBottom:12}}>⏳</div><p>Chargement…</p></div>}
+        {loading && <div style={{color:'rgba(255,255,255,0.7)', textAlign:'center'}}><div style={{fontSize:32, marginBottom:12}}>⏳</div><p>{t('loading')}</p></div>}
         {error  && <div style={{color:'#fca5a5', textAlign:'center'}}><div style={{fontSize:32, marginBottom:12}}>⚠️</div><p>{error}</p></div>}
         {url && (isImg
           ? <img src={url} alt={doc.title} style={{maxWidth:'100%', maxHeight:'100%', objectFit:'contain', borderRadius:8}}/>
@@ -134,8 +149,34 @@ function PreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) 
             : <div style={{color:'#fff', textAlign:'center'}}>
                 <div style={{fontSize:48, marginBottom:16}}>📎</div>
                 <div style={{fontSize:15, fontWeight:700, marginBottom:20}}>{doc.file_name}</div>
-                <button onClick={handleDownload} style={{padding:'10px 24px', background:'#2563eb', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:'pointer'}}>⬇ Télécharger</button>
+                <button onClick={handleDownload} style={{padding:'10px 24px', background:'#2563eb', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:'pointer'}}>⬇ {t('download')}</button>
               </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ══ Notification Dropdown ══════════════════════════ */
+function NotifDropdown({ count, today, t, onClose }: {
+  count: number; today: string; t: (k: string) => string; onClose: () => void
+}) {
+  return (
+    <div className={s.notifDropdown}>
+      <div className={s.notifDropdownHeader}>
+        <span className={s.notifDropdownTitle}>{t('notifTitle')}</span>
+        <button className={s.notifCloseBtn} onClick={onClose}><IC.Close/></button>
+      </div>
+      <div className={s.notifDropdownBody}>
+        {count > 0 ? (
+          <div className={s.notifItem}>
+            <div className={s.notifItemIcon}>📄</div>
+            <div className={s.notifItemText}>
+              <span className={s.notifItemCount}>{count}</span> {t('notifToday')}
+            </div>
+          </div>
+        ) : (
+          <div className={s.notifEmpty}>{t('notifNone')}</div>
         )}
       </div>
     </div>
@@ -174,6 +215,9 @@ function DocCard({ doc, onPreview, onDownload }: {
 /* ══ Page principale ════════════════════════════════ */
 export default function DashboardPage() {
   const router = useRouter()
+
+  const { lang, toggleLang, t } = useLang()
+
   const [profile,    setProfile]    = useState<UserProfile | null>(null)
   const [docs,       setDocs]       = useState<Document[]>([])
   const [count,      setCount]      = useState(0)
@@ -193,6 +237,50 @@ export default function DashboardPage() {
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
   const searchRef = useRef<HTMLDivElement>(null)
 
+  /* ── Notifications state ── */
+  const [notifCount,   setNotifCount]   = useState(0)
+  const [notifDate,    setNotifDate]    = useState('')
+  const [showNotif,    setShowNotif]    = useState(false)
+  const [notifVisible, setNotifVisible] = useState(false)
+  const notifRef = useRef<HTMLDivElement>(null)
+
+  /* ── Load notifications ── */
+  useEffect(() => {
+    apiGetNotificationsToday()
+      .then(data => {
+        const today = data.date // 'YYYY-MM-DD'
+        const seenDate = getNotifSeenDate()
+        // Afficher le badge seulement si on n'a pas encore vu les notifs d'aujourd'hui
+        if (data.count > 0 && seenDate !== today) {
+          setNotifCount(data.count)
+          setNotifDate(today)
+          setNotifVisible(true)
+        }
+      })
+      .catch(() => {/* silencieux */})
+  }, [])
+
+  /* ── Close notif on outside click ── */
+  useEffect(() => {
+    const h = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotif(false)
+      }
+    }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
+  /* ── Mark notif as seen when dropdown opened ── */
+  const handleBellClick = () => {
+    setShowNotif(prev => !prev)
+    if (!showNotif && notifDate) {
+      setNotifSeenDate(notifDate)
+      setNotifVisible(false)
+    }
+  }
+
+  /* ── Load profile & referentials ── */
   useEffect(() => {
     const cached = getProfile()
     if (cached) {
@@ -227,11 +315,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (query.length < 2) { setSugg([]); setShowSugg(false); return }
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       const s = levenshteinSuggest(query, corpus, 7)
       setSugg(s); setShowSugg(s.length > 0)
     }, 180)
-    return () => clearTimeout(t)
+    return () => clearTimeout(timer)
   }, [query, corpus])
 
   const loadDocs = useCallback(async (q: string, f: typeof filters) => {
@@ -276,7 +364,7 @@ export default function DashboardPage() {
       const r = await apiGetDocumentUrl(doc.id, 'download')
       const a = document.createElement('a'); a.href = r.url; a.download = r.file_name
       document.body.appendChild(a); a.click(); document.body.removeChild(a)
-    } catch { alert('Impossible de télécharger le fichier.') }
+    } catch { alert(t('downloadError')) }
   }
   const handleLogout = async () => { await apiLogout(); router.push('/auth') }
 
@@ -286,7 +374,7 @@ export default function DashboardPage() {
 
   return (
     <div className={s.shell}>
-      {previewDoc && <PreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)}/>}
+      {previewDoc && <PreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} t={t}/>}
       <div className={`${s.overlay} ${!sideOpen ? s.overlayHidden : ''}`} onClick={() => setSideOpen(false)}/>
 
       {/* ══ SIDEBAR ══ */}
@@ -304,23 +392,22 @@ export default function DashboardPage() {
             <div className={s.sidebarAvatar}>{initials}</div>
             <div style={{minWidth:0}}>
               <div className={s.sidebarName}>{profile?.full_name ?? profile?.email ?? '—'}</div>
-              <div className={s.sidebarRole}>{profile?.class_code ?? 'Étudiant'}</div>
+              <div className={s.sidebarRole}>{profile?.class_code ?? t('studentBadge')}</div>
             </div>
           </div>
         </div>
         <nav className={s.nav}>
-          <div className={s.navSection}>Navigation</div>
-          <button className={`${s.navItem} ${s.navItemActive}`}><IC.Home/>Accueil</button>
+          <div className={s.navSection}>{t('navNavigation')}</div>
+          <button className={`${s.navItem} ${s.navItemActive}`}><IC.Home/>{t('navHome')}</button>
           <button className={s.navItem} onClick={() => {
-            // Affiche tous les docs de la filière (class_id du profil, sans autres filtres)
             clearSearch()
             setFilters({ class_id: profile?.class_id ?? '', subject_id:'', year_id:'', type_id:'', teacher_id:'' })
-          }}><IC.Docs/>Tous les documents</button>
-          <div className={s.navSection}>Mon compte</div>
-          <button className={s.navItem} onClick={() => router.push('/settings')}><IC.Settings/>Paramètres</button>
+          }}><IC.Docs/>{t('navAllDocs')}</button>
+          <div className={s.navSection}>{t('navMyAccount')}</div>
+          <button className={s.navItem} onClick={() => router.push('/settings')}><IC.Settings/>{t('navSettings')}</button>
         </nav>
         <div className={s.sidebarBottom}>
-          <button className={s.logoutFull} onClick={handleLogout}><IC.Logout/> Se déconnecter</button>
+          <button className={s.logoutFull} onClick={handleLogout}><IC.Logout/> {t('navLogout')}</button>
         </div>
       </aside>
 
@@ -330,26 +417,54 @@ export default function DashboardPage() {
           <button className={s.menuToggle} onClick={() => setSideOpen(!sideOpen)}><IC.Menu/></button>
           <div className={s.topbarLeft}>
             <div className={s.topbarTitle}>
-              Bonjour, {profile?.full_name ?? profile?.email ?? '—'}
+              {t('hello')}, {profile?.full_name ?? profile?.email ?? '—'}
               {profile?.class_code && <span> — {profile.class_code}</span>}
             </div>
           </div>
-          <div className={s.iconBtn}><IC.Bell/></div>
+
+          {/* ── Bouton langue ── */}
+          <button
+            className={s.iconBtn}
+            onClick={toggleLang}
+            title={lang === 'fr' ? 'Switch to English' : 'Passer en français'}
+            style={{fontWeight:700, fontSize:12, letterSpacing:'0.03em', gap:0, width:'auto', padding:'0 10px', minWidth:38}}
+          >
+            {lang === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
+          </button>
+
+
+          {/* ── Cloche notifications ── */}
+          <div style={{position:'relative'}} ref={notifRef}>
+            <button className={s.iconBtn} onClick={handleBellClick} title="Notifications">
+              <IC.Bell/>
+              {notifVisible && notifCount > 0 && (
+                <span className={s.notifBadge}>{notifCount > 99 ? '99+' : notifCount}</span>
+              )}
+            </button>
+            {showNotif && (
+              <NotifDropdown
+                count={notifCount}
+                today={notifDate}
+                t={t}
+                onClose={() => setShowNotif(false)}
+              />
+            )}
+          </div>
         </header>
 
         <main className={s.content}>
           {/* ── Recherche ── */}
           <div className={s.searchSection} ref={searchRef}>
-            <div className={s.searchTitle}>Que cherchez-vous ?</div>
+            <div className={s.searchTitle}>{t('searchTitle')}</div>
             <div className={s.searchHint}>
-              Tapez un mot-clé, matière, enseignant, type de document. Accepte les abréviations : <em>td, tp, proba, exam, corrigé…</em>
+              {t('searchHint')} <em>{t('searchHintExample')}</em>
             </div>
             <div style={{position:'relative'}}>
               <div className={s.searchInputRow}>
                 <div className={s.searchIcon}><IC.Search size={17} color="#94a3b8"/></div>
                 <input
                   className={s.searchInput}
-                  placeholder="Ex: cours probabilités, examen estimation, TP stats..."
+                  placeholder={t('searchPlaceholder')}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') doSearch() }}
@@ -358,7 +473,7 @@ export default function DashboardPage() {
                 />
                 {query && <button onClick={clearSearch} className={s.clearBtn}><IC.Close/></button>}
                 <button className={s.searchBtn} onClick={doSearch} disabled={loading}>
-                  <IC.Search size={15}/> Rechercher
+                  <IC.Search size={15}/> {t('searchBtn')}
                 </button>
               </div>
               {showSugg && suggestions.length > 0 && (
@@ -376,51 +491,53 @@ export default function DashboardPage() {
           {/* ── Filtres ── */}
           <div className={s.filtersSection}>
             <div className={s.filterGroup}>
-              <label className={s.filterLabel}>Matière</label>
+              <label className={s.filterLabel}>{t('filterSubject')}</label>
               <select className={s.filterSelect} value={filters.subject_id} onChange={e => setFilter('subject_id', e.target.value)}>
-                <option value="">Toutes</option>
+                <option value="">{t('filterAllSubjects')}</option>
                 {filteredSubs.map(su => <option key={su.id} value={su.id}>{su.name}</option>)}
               </select>
             </div>
             <div className={s.filterGroup}>
-              <label className={s.filterLabel}>Enseignant</label>
+              <label className={s.filterLabel}>{t('filterTeacher')}</label>
               <select className={s.filterSelect} value={filters.teacher_id} onChange={e => setFilter('teacher_id', e.target.value)}>
-                <option value="">Tous</option>
-                {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
+                <option value="">{t('filterAllTeachers')}</option>
+                {teachers.map(tch => <option key={tch.id} value={tch.id}>{tch.full_name}</option>)}
               </select>
             </div>
             <div className={s.filterGroup}>
-              <label className={s.filterLabel}>Année</label>
+              <label className={s.filterLabel}>{t('filterYear')}</label>
               <select className={s.filterSelect} value={filters.year_id} onChange={e => setFilter('year_id', e.target.value)}>
-                <option value="">Toutes</option>
+                <option value="">{t('filterAllYears')}</option>
                 {years.map(y => <option key={y.id} value={y.id}>{y.label}</option>)}
               </select>
             </div>
             <div className={s.filterGroup}>
-              <label className={s.filterLabel}>Type</label>
+              <label className={s.filterLabel}>{t('filterType')}</label>
               <select className={s.filterSelect} value={filters.type_id} onChange={e => setFilter('type_id', e.target.value)}>
-                <option value="">Tous</option>
+                <option value="">{t('filterAllTypes')}</option>
                 {docTypes.map(dt => <option key={dt.id} value={dt.id}>{dt.label}</option>)}
               </select>
             </div>
             {activeFiltersCount > 0 && (
-              <button className={s.resetBtn} onClick={clearFilters}><IC.Close/> Réinitialiser</button>
+              <button className={s.resetBtn} onClick={clearFilters}><IC.Close/> {t('filterReset')}</button>
             )}
           </div>
 
           {/* ── Résultats ── */}
           <div className={s.resultsHeader}>
-            <div className={s.resultsTitle}>Documents de votre filière</div>
-            <div className={s.resultsMeta}>{loading ? 'Chargement…' : `${count} document${count !== 1 ? 's' : ''}`}</div>
+            <div className={s.resultsTitle}>{t('resultsTitle')}</div>
+            <div className={s.resultsMeta}>
+              {loading ? t('loading') : `${count} ${count !== 1 ? t('docCountN') : t('docCount1')}`}
+            </div>
           </div>
 
           {!initDone || loading ? (
-            <div className={s.empty}><div className={s.emptyIcon}>⏳</div><div className={s.emptyTitle}>Chargement des documents…</div></div>
+            <div className={s.empty}><div className={s.emptyIcon}>⏳</div><div className={s.emptyTitle}>{t('loadingDocs')}</div></div>
           ) : docs.length === 0 ? (
             <div className={s.empty}>
               <div className={s.emptyIcon}>{query ? '🔍' : '📭'}</div>
-              <div className={s.emptyTitle}>{query ? 'Aucun résultat' : 'Aucun document disponible'}</div>
-              <div className={s.emptySub}>{query ? 'Essayez un autre terme ou vérifiez vos filtres.' : 'Les documents apparaîtront ici une fois publiés.'}</div>
+              <div className={s.emptyTitle}>{query ? t('emptyNoResult') : t('emptyNoDocs')}</div>
+              <div className={s.emptySub}>{query ? t('emptyNoResultSub') : t('emptyNoDocsSub')}</div>
             </div>
           ) : (
             <div className={s.docsGrid}>
