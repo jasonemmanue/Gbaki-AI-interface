@@ -9,7 +9,7 @@ import {
   type ClassItem, type UserProfile,
 } from '../../lib/api'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://gbaki-backend-production.up.railway.app/api/'
 
 /* ── helpers ────────────────────────────────────────────── */
 function getBadgeClass(code: string, active: boolean): string {

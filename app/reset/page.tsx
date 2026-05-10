@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import s from './reset.module.css'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://gbaki-backend-production.up.railway.app/api/'
 
 async function doReset(email: string, resetToken: string, newPassword: string) {
   const r = await fetch(`${API}/auth/reset-password/`, {

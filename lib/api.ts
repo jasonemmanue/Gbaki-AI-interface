@@ -1,7 +1,7 @@
 // gbaki-searcher/lib/api.ts
 // ✅ Ajout : apiGetNotificationsToday()
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://gbaki-backend-production.up.railway.app/api'
 
 /* ── Token helpers ────────────────────────────────── */
 export function getToken(): string | null {
