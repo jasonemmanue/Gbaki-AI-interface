@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px 16px 16px;
-  background: #e8f0fb;
+  background: var(--x-page);
   position: relative;
   overflow: hidden;
 }
@@ -17,7 +17,7 @@
   left: -120px;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(37,99,235,0.13) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--x-blob) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
@@ -29,7 +29,7 @@
   right: -100px;
   width: 350px;
   height: 350px;
-  background: radial-gradient(circle, rgba(37,99,235,0.10) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--x-blob) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
@@ -37,9 +37,9 @@
 
 /* ─── Card ────────────────────────────────────────────────── */
 .card {
-  background: #ffffff;
+  background: var(--x-card);
   border-radius: 24px;
-  box-shadow: 0 4px 24px rgba(37,99,235,0.10), 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: var(--x-card-shadow);
   width: 100%;
   max-width: 460px;
   padding: 36px 36px 32px;
@@ -77,7 +77,7 @@
 .logoEnsea {
   font-size: 13px;
   font-weight: 800;
-  color: #1d4ed8;
+  color: var(--x-primary-hover);
   letter-spacing: 0.06em;
   line-height: 1;
 }
@@ -85,7 +85,7 @@
 .logoDsc {
   font-size: 10px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--x-muted);
   letter-spacing: 0.03em;
   line-height: 1.2;
 }
@@ -93,14 +93,14 @@
 .title {
   font-size: 28px;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--x-text);
   letter-spacing: -0.5px;
   line-height: 1;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--x-muted);
   font-weight: 400;
   text-align: center;
   line-height: 1.4;
@@ -109,7 +109,7 @@
 /* ─── Tabs ────────────────────────────────────────────────── */
 .tabs {
   display: flex;
-  background: #f1f5f9;
+  background: var(--x-soft-bg);
   border-radius: 12px;
   padding: 4px;
   margin-bottom: 24px;
@@ -124,21 +124,21 @@
   background: transparent;
   font-size: 14px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--x-muted);
   cursor: pointer;
   transition: all 0.22s ease;
   font-family: inherit;
 }
 
 .tab:hover:not(.tabActive) {
-  color: #1e293b;
-  background: rgba(255,255,255,0.6);
+  color: var(--x-text);
+  background: var(--x-hover-bg);
 }
 
 .tabActive {
-  background: #2563eb;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.28);
+  background: var(--x-primary);
+  color: var(--x-primary-text);
+  box-shadow: 0 2px 8px var(--x-primary-ring);
 }
 
 /* ─── Form ────────────────────────────────────────────────── */
@@ -167,7 +167,7 @@
 .label {
   font-size: 13.5px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--x-text);
   letter-spacing: 0.01em;
 }
 
@@ -187,25 +187,25 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  border: 2px solid #cbd5e1;
+  border: 2px solid var(--x-border);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--x-input);
   transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
   overflow: visible;
   position: relative;
 }
 
 .inputWrapper:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-  background: #ffffff;
+  border-color: var(--x-primary);
+  box-shadow: 0 0 0 3px var(--x-primary-ring);
+  background: var(--x-input-focus);
   outline: none;
 }
 
 .inputError {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important;
-  background: #fff5f5 !important;
+  border-color: var(--x-error) !important;
+  box-shadow: 0 0 0 3px var(--x-error-bg) !important;
+  background: var(--x-error-bg) !important;
 }
 
 .inputIcon {
@@ -213,7 +213,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 12px;
-  color: #94a3b8;
+  color: var(--x-faint);
   flex-shrink: 0;
   height: 100%;
 }
@@ -233,14 +233,14 @@
   background: transparent;
   padding: 0 12px 0 0;
   font-size: 14.5px;
-  color: #1e293b;
+  color: var(--x-text);
   outline: none;
   font-family: inherit;
   display: block;
 }
 
 .input::placeholder {
-  color: #b0bec5;
+  color: var(--x-placeholder);
 }
 
 .eyeBtn {
@@ -250,7 +250,7 @@
   background: none;
   border: none;
   padding: 0 12px;
-  color: #94a3b8;
+  color: var(--x-faint);
   cursor: pointer;
   flex-shrink: 0;
   height: 48px;
@@ -258,12 +258,12 @@
 }
 
 .eyeBtn:hover {
-  color: #2563eb;
+  color: var(--x-primary);
 }
 
 .errorMsg {
   font-size: 12px;
-  color: #ef4444;
+  color: var(--x-error);
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -297,12 +297,12 @@
   transition: color 0.3s;
 }
 
-/* ─── Submit Button — BLEU #2563eb ────────────────────────── */
+/* ─── Submit Button — BLEU var(--x-primary) ────────────────────────── */
 .submitBtn {
   width: 100%;
   padding: 14px;
-  background-color: #2563eb;
-  color: #ffffff;
+  background-color: var(--x-primary);
+  color: var(--x-primary-text);
   border: none;
   border-radius: 10px;
   font-size: 15px;
@@ -311,7 +311,7 @@
   cursor: pointer;
   margin-top: 4px;
   transition: background-color 0.18s, transform 0.12s, box-shadow 0.18s;
-  box-shadow: 0 4px 14px rgba(37,99,235,0.30);
+  box-shadow: 0 4px 14px var(--x-primary-ring);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -320,8 +320,8 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-  background-color: #1d4ed8;
-  box-shadow: 0 6px 20px rgba(37,99,235,0.38);
+  background-color: var(--x-primary-hover);
+  box-shadow: 0 6px 20px var(--x-primary-ring);
   transform: translateY(-1px);
 }
 
@@ -330,7 +330,7 @@
 }
 
 .submitBtn:disabled {
-  background-color: #2563eb;
+  background-color: var(--x-primary);
   opacity: 0.75;
   cursor: not-allowed;
 }
@@ -339,8 +339,8 @@
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2.5px solid rgba(255,255,255,0.4);
-  border-top-color: #fff;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--x-primary-text);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   display: inline-block;
@@ -359,13 +359,13 @@
 .forgotLink {
   font-size: 13.5px;
   font-weight: 500;
-  color: #2563eb;
+  color: var(--x-primary);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 .forgotLink:hover {
-  color: #1d4ed8;
+  color: var(--x-primary-hover);
   text-decoration: underline;
 }
 
@@ -376,14 +376,14 @@
   gap: 5px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--x-primary);
   text-decoration: none;
   margin-bottom: 20px;
   transition: color 0.15s;
 }
 
 .backLink:hover {
-  color: #1d4ed8;
+  color: var(--x-primary-hover);
   text-decoration: underline;
 }
 
@@ -400,8 +400,8 @@
 .successIcon {
   width: 56px;
   height: 56px;
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--x-success-bg);
+  color: var(--x-success);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -413,12 +413,12 @@
 .successTitle {
   font-size: 17px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--x-text);
 }
 
 .successSub {
   font-size: 14px;
-  color: #64748b;
+  color: var(--x-muted);
   text-align: center;
   line-height: 1.5;
 }
@@ -427,7 +427,7 @@
 .footer {
   margin-top: 20px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--x-faint);
   text-align: center;
   position: relative;
   z-index: 1;

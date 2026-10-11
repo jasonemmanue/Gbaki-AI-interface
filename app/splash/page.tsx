@@ -25,7 +25,7 @@ export default function SplashPage() {
 
         html, body {
           height: 100%;
-          background: #fafbfc;
+          background: var(--x-page);
           font-family: 'Space Grotesk', sans-serif;
           -webkit-font-smoothing: antialiased;
         }
@@ -37,7 +37,7 @@ export default function SplashPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #fafbfc;
+          background: var(--x-page);
           animation: splashFadeOut 0.5s ease 3s forwards;
         }
 
@@ -58,7 +58,7 @@ export default function SplashPage() {
           font-weight: 500;
           font-size: 36px;
           letter-spacing: 0.02em;
-          color: #0f1629;
+          color: var(--x-text);
         }
 
         .wordmark span {
@@ -109,8 +109,8 @@ export default function SplashPage() {
           <svg viewBox="0 0 200 220" width="220" height="240" style={{ overflow: 'visible' }}>
             <defs>
               <linearGradient id="g-stroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#1a2340"/>
-                <stop offset="100%" stopColor="#0f1629"/>
+                <stop offset="0%" style={{ stopColor: 'var(--x-text)' }}/>
+                <stop offset="100%" style={{ stopColor: 'var(--x-text)' }}/>
               </linearGradient>
             </defs>
             {/* bowl */}
@@ -127,7 +127,7 @@ export default function SplashPage() {
               className="desc"
               d="M 126 110 L 126 168 Q 126 188 106 188 L 88 188"
               fill="none"
-              stroke="#1a2340"
+              style={{ stroke: 'var(--x-text)' }}
               strokeWidth="14"
               strokeLinecap="round"
             />
@@ -145,7 +145,7 @@ export default function SplashPage() {
             <span>a</span>
             <span>k</span>
             <span>i</span>
-            <span style={{ color: '#2a3550', margin: '0 2px' }}>·</span>
+            <span style={{ color: 'var(--x-muted)', margin: '0 2px' }}>·</span>
             <span style={{ color: '#5b6cff' }}>a</span>
             <span style={{ color: '#5b6cff' }}>i</span>
           </div>

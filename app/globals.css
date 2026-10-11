@@ -72,12 +72,63 @@
 
   --font-body: var(--font-barlow), 'Segoe UI', sans-serif;
   --font-title: var(--font-barlow-condensed), var(--font-barlow), 'Segoe UI', sans-serif;
+
+  /* Pages externes (connexion, mot de passe oublié, choix de classe) */
+  --x-page:          #e8f0fb;
+  --x-blob:          rgba(37, 99, 235, 0.12);
+  --x-card:          #ffffff;
+  --x-card-shadow:   0 4px 24px rgba(37, 99, 235, 0.10), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --x-text:          #1e293b;
+  --x-muted:         #64748b;
+  --x-faint:         #94a3b8;
+  --x-placeholder:   #a3b1bf;
+  --x-soft-bg:       #f1f5f9;
+  --x-input:         #f8fafc;
+  --x-input-focus:   #ffffff;
+  --x-border:        #cbd5e1;
+  --x-primary:       #2563eb;
+  --x-primary-hover: #1d4ed8;
+  --x-primary-text:  #ffffff;
+  --x-primary-ring:  rgba(37, 99, 235, 0.15);
+  --x-hover-bg:      rgba(255, 255, 255, 0.6);
+  --x-row-active:    #eff6ff;
+  --x-error:         #dc2626;
+  --x-error-bg:      #fef2f2;
+  --x-error-border:  #fecaca;
+  --x-success:       #16a34a;
+  --x-success-bg:    #dcfce7;
+  --x-success-border:#bbf7d0;
   color-scheme: light;
 }
 
 /* Sombre : noir graphite */
 :root[data-theme="dark"] {
   --g-bg:            #121417;
+  --x-page:          #0e1013;
+  --x-blob:          rgba(111, 147, 189, 0.10);
+  --x-card:          #16191d;
+  --x-card-shadow:   0 4px 24px rgba(0, 0, 0, 0.45);
+  --x-text:          #f1f3f5;
+  --x-muted:         #a3abb6;
+  --x-faint:         #7d8794;
+  --x-placeholder:   #66707c;
+  --x-soft-bg:       #1d2126;
+  --x-input:         #1d2126;
+  --x-input-focus:   #22272d;
+  --x-border:        #39404a;
+  --x-primary:       #4f86e8;
+  --x-primary-hover: #6a9af0;
+  --x-primary-text:  #ffffff;
+  --x-primary-ring:  rgba(79, 134, 232, 0.25);
+  --x-hover-bg:      rgba(255, 255, 255, 0.05);
+  --x-row-active:    #1d2733;
+  --x-error:         #f87171;
+  --x-error-bg:      rgba(239, 68, 68, 0.12);
+  --x-error-border:  rgba(239, 68, 68, 0.35);
+  --x-success:       #4ade80;
+  --x-success-bg:    rgba(34, 197, 94, 0.14);
+  --x-success-border:rgba(34, 197, 94, 0.35);
+
   --g-surface:       #16191d;
   --g-card:          #181b20;
   --g-border:        #2a2f36;
@@ -113,6 +164,31 @@
 /* Bleu nuit */
 :root[data-theme="blue"] {
   --g-bg:            #061a3a;
+  --x-page:          #04142e;
+  --x-blob:          rgba(122, 162, 214, 0.12);
+  --x-card:          #08204a;
+  --x-card-shadow:   0 4px 24px rgba(0, 0, 0, 0.35);
+  --x-text:          #f2f6fc;
+  --x-muted:         #a9bbd6;
+  --x-faint:         #7f95b8;
+  --x-placeholder:   #6f86ab;
+  --x-soft-bg:       #0b2552;
+  --x-input:         #0b2552;
+  --x-input-focus:   #0d2a5a;
+  --x-border:        #2a4d80;
+  --x-primary:       #4f8ff0;
+  --x-primary-hover: #6aa2f5;
+  --x-primary-text:  #ffffff;
+  --x-primary-ring:  rgba(79, 143, 240, 0.28);
+  --x-hover-bg:      rgba(255, 255, 255, 0.06);
+  --x-row-active:    #0f2d5a;
+  --x-error:         #fca5a5;
+  --x-error-bg:      rgba(239, 68, 68, 0.14);
+  --x-error-border:  rgba(239, 68, 68, 0.4);
+  --x-success:       #86efac;
+  --x-success-bg:    rgba(34, 197, 94, 0.16);
+  --x-success-border:rgba(34, 197, 94, 0.4);
+
   --g-surface:       #08204a;
   --g-card:          #0a2450;
   --g-border:        #1b3a68;

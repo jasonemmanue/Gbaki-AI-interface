@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import GbakiLogo from '../../components/GbakiLogo'
 import { useRouter } from 'next/navigation'
 import styles from './auth.module.css'
 
@@ -42,14 +42,9 @@ async function doRegister(email: string, password: string, full_name: string) {
 function Logo() {
   return (
     <div className={styles.logoWrapper}>
-      <Image
-        src="/logo.png"
-        alt="ENSEA Data Science Club"
-        width={120}
-        height={120}
-        style={{ objectFit: 'contain' }}
-        priority
-      />
+      <span style={{ color: 'var(--x-text)', display: 'inline-flex' }}>
+        <GbakiLogo size={84} title="Gbaki-AI" />
+      </span>
     </div>
   )
 }
@@ -193,8 +188,8 @@ function LoginForm() {
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       {errors.server && (
         <div style={{
-          background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8,
-          padding: '10px 14px', fontSize: 13, color: '#dc2626', fontWeight: 600,
+          background: 'var(--x-error-bg)', border: '1px solid var(--x-error-border)', borderRadius: 8,
+          padding: '10px 14px', fontSize: 13, color: 'var(--x-error)', fontWeight: 600,
         }}>
           ⚠ {errors.server}
         </div>
@@ -281,8 +276,8 @@ function RegisterForm() {
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       {errors.server && (
         <div style={{
-          background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8,
-          padding: '10px 14px', fontSize: 13, color: '#dc2626', fontWeight: 600,
+          background: 'var(--x-error-bg)', border: '1px solid var(--x-error-border)', borderRadius: 8,
+          padding: '10px 14px', fontSize: 13, color: 'var(--x-error)', fontWeight: 600,
         }}>
           ⚠ {errors.server}
         </div>

@@ -1,7 +1,7 @@
 /* app/onboarding/onboarding.module.css */
 .page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #eff6ff 0%, #f0f4ff 100%);
+  background: var(--x-page);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 24px 16px;
@@ -9,9 +9,9 @@
 }
 
 .card {
-  background: #fff;
+  background: var(--x-card);
   border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(37,99,235,0.12);
+  box-shadow: var(--x-card-shadow);
   width: 100%; max-width: 480px;
   padding: 36px 32px 32px;
   animation: slideUp 0.4s cubic-bezier(0.22,1,0.36,1) both;
@@ -24,15 +24,15 @@
 .top { text-align: center; margin-bottom: 24px; }
 
 .title {
-  font-size: 21px; font-weight: 800; color: #111827; margin-bottom: 8px;
+  font-size: 21px; font-weight: 800; color: var(--x-text); margin-bottom: 8px;
 }
 .sub {
-  font-size: 13.5px; color: #6b7280; line-height: 1.6; max-width: 360px; margin: 0 auto;
+  font-size: 13.5px; color: var(--x-muted); line-height: 1.6; max-width: 360px; margin: 0 auto;
 }
 
 .error {
-  background: #fef2f2; color: #dc2626;
-  border: 1px solid #fecaca; border-radius: 8px;
+  background: var(--x-error-bg); color: var(--x-error);
+  border: 1px solid var(--x-error-border); border-radius: 8px;
   padding: 10px 14px; font-size: 13px; margin-bottom: 14px;
 }
 
@@ -44,17 +44,17 @@
   padding-right: 4px;
 }
 .list::-webkit-scrollbar { width: 4px; }
-.list::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
+.list::-webkit-scrollbar-thumb { background: var(--x-border); border-radius: 99px; }
 
 .classBtn {
   display: flex; align-items: center; gap: 12px;
   padding: 11px 14px;
-  border: 1.5px solid #e5e7eb; border-radius: 12px;
-  background: #f8fafc; cursor: pointer; text-align: left;
+  border: 1.5px solid var(--x-border); border-radius: 12px;
+  background: var(--x-input); cursor: pointer; text-align: left;
   transition: all 0.15s; width: 100%; font-family: inherit;
 }
-.classBtn:hover { border-color: #93c5fd; background: #f0f7ff; }
-.classBtnActive { border-color: #2563eb !important; background: #eff6ff !important; }
+.classBtn:hover { border-color: var(--x-primary); background: var(--x-row-active); }
+.classBtnActive { border-color: var(--x-primary) !important; background: var(--x-row-active) !important; }
 
 /* Badge — taille adaptée pour AS1, ISE 1 M, IPS 1 E etc. */
 .badge {
@@ -69,20 +69,20 @@
 }
 
 .classInfo { flex: 1; min-width: 0; }
-.className  { font-size: 13.5px; font-weight: 700; color: #111827; }
-.classCycle { font-size: 11.5px; color: #6b7280; margin-top: 1px; }
+.className  { font-size: 13.5px; font-weight: 700; color: var(--x-text); }
+.classCycle { font-size: 11.5px; color: var(--x-muted); margin-top: 1px; }
 
-.check { margin-left: auto; color: #2563eb; font-size: 17px; font-weight: 800; flex-shrink: 0; }
+.check { margin-left: auto; color: var(--x-primary); font-size: 17px; font-weight: 800; flex-shrink: 0; }
 
 /* ── Bouton save ───────────────────────────────── */
 .saveBtn {
   width: 100%; padding: 14px;
-  background: #2563eb; color: #fff;
+  background: var(--x-primary); color: var(--x-primary-text);
   border: none; border-radius: 12px;
   font-size: 15px; font-weight: 800;
   cursor: pointer; font-family: inherit;
   transition: background 0.15s;
   display: flex; align-items: center; justify-content: center;
 }
-.saveBtn:hover:not(:disabled) { background: #1d4ed8; }
-.saveBtn:disabled { background: #93c5fd; cursor: not-allowed; }
+.saveBtn:hover:not(:disabled) { background: var(--x-primary-hover); }
+.saveBtn:disabled { background: var(--x-primary); opacity: 0.5; cursor: not-allowed; }

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import GbakiLogo from '../../components/GbakiLogo'
 import { useRouter } from 'next/navigation'
 import { apiGetClasses, apiUpdateProfile, apiMe, getProfile, saveProfile, type ClassItem } from '../../lib/api'
 import ob from './onboarding.module.css'
@@ -59,8 +59,9 @@ export default function OnboardingPage() {
     <div className={ob.page}>
       <div className={ob.card}>
         <div className={ob.top}>
-          <Image src="/logo.png" alt="ENSEA DSC" width={72} height={72}
-            style={{ objectFit:'contain', marginBottom:12 }} priority/>
+          <span style={{ color: 'var(--x-text)', display: 'inline-flex', marginBottom: 12 }}>
+            <GbakiLogo size={64} title="Gbaki-AI" />
+          </span>
           <h1 className={ob.title}>Choisissez votre filière</h1>
           <p className={ob.sub}>
             Cette information permet de vous afficher les documents de votre classe directement.
