@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import s from './settings.module.css'
 import { useLang } from '../../context/LangContext'
+import { useTheme, THEMES, type Theme } from '../../context/ThemeContext'
 import {
   apiGetClasses, apiUpdateProfile, apiMe,
   getProfile, saveProfile, saveToken, clearAuth,
   type ClassItem, type UserProfile,
 } from '../../lib/api'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://gbaki-backend-production.up.railway.app/api/'
+import { API_BASE as API } from '../../lib/api'
 
 /* ── helpers ────────────────────────────────────────────── */
 function getBadgeClass(code: string, active: boolean): string {
@@ -41,7 +42,8 @@ function EyeIcon({ open }: { open: boolean }) {
 export default function SettingsPage() {
   const router = useRouter()
   const { t, lang, toggleLang } = useLang()
-  const [tab, setTab] = useState<'class' | 'account'>('class')
+  const { theme, setTheme } = useTheme()
+  const [tab, setTab] = useState<'class' | 'account' | 'appearance'>('class')
 
   // Profil
   const [profile,    setProfile]    = useState<UserProfile | null>(null)
@@ -61,7 +63,8 @@ export default function SettingsPage() {
   const [accMsg,    setAccMsg]    = useState<{type:'ok'|'err', text:string} | null>(null)
 
   useEffect(() => {
-    apiGetClasses().then(setClasses).catch(console.error)
+    // Pour le moment, seule la filière AS est ouverte
+    apiGetClasses().then(cs => setClasses(cs.filter(c => c.code.toUpperCase().startsWith('AS')))).catch(console.error)
     const cached = getProfile()
     if (cached) {
       setProfile(cached); setProfileId(cached.id)
@@ -163,7 +166,31 @@ export default function SettingsPage() {
           >
             {t('settingsTabAccount')}
           </button>
+          <button
+            className={`${s.tab} ${tab === 'appearance' ? s.tabActive : ''}`}
+            onClick={() => setTab('appearance')}
+          >
+            {t('settingsTabAppearance')}
+          </button>
         </div>
+
+        {/* ── Onglet Apparence ── */}
+        {tab === 'appearance' && (
+          <div className={s.panel}>
+            <div className={s.panelTitle}>{t('settingsAppearanceTitle')}</div>
+            <p className={s.panelSub}>{t('settingsAppearanceSub')}</p>
+            <div className={s.themeGrid} role="radiogroup">
+              {THEMES.map((th: Theme) => (
+                <button key={th} role="radio" aria-checked={theme === th}
+                  className={`${s.themeBtn} ${theme === th ? s.themeBtnActive : ''}`}
+                  onClick={() => setTheme(th)}>
+                  <span className={`${s.swatch} ${s['swatch_' + th]}`}><span /><span /></span>
+                  {t(th === 'light' ? 'themeLight' : th === 'dark' ? 'themeDark' : 'themeBlue')}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── Onglet Classe ── */}
         {tab === 'class' && (

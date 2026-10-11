@@ -1,80 +1,166 @@
 /*
- * GBAKI-Searcher — globals.css
- * ✅ Ajout : variables dark mode via [data-theme="dark"]
+ * GBAKI-AI — globals.css
+ * Trois thèmes via [data-theme] sur <html> : light (défaut), dark (sombre), blue (bleu nuit).
+ * Les variables --primary, --surface, --text… restent utilisées par auth, settings et onboarding.
  */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Couleurs principales */
-  --primary:       #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  --accent:        #0ea5e9;
+  /* Palette Gbaki-AI (maquettes) */
+  --g-bg:            #f1f1f0;
+  --g-surface:       #f7f7f6;
+  --g-card:          #f9f9f8;
+  --g-border:        #dcdddf;
+  --g-border-strong: #c9ccd1;
+  --g-text:          #1b2430;
+  --g-text-soft:     #3a4553;
+  --g-muted:         #6b7480;
+  --g-accent:        #5b7ea6;
+  --g-accent-hover:  #4c6f97;
+  --g-accent-text:   #ffffff;
+  --g-chip-bg:       #e5edf6;
+  --g-chip-text:     #3f5f85;
+  --g-row-active:    #eaf1f9;
+  --g-mark:          #dbe7f5;
+  --g-input:         #f3f4f5;
+  --g-sidebar:       #1e2a3a;
+  --g-sidebar-2:     #2c3b50;
+  --g-sidebar-text:  #c9d3e0;
+  --g-sidebar-muted: #8494aa;
+  --g-hero:          #1e2a3a;
+  --g-paper:         #ffffff;
+  --g-shadow:        0 1px 2px rgba(20, 30, 45, 0.06), 0 8px 24px rgba(20, 30, 45, 0.06);
 
-  /* Backgrounds */
-  --bg:            #f0f4ff;
+  /* Variables historiques (auth, settings, onboarding) */
+  --primary:       #4c6f97;
+  --primary-hover: #3f5f85;
+  --primary-light: #e5edf6;
+  --accent:        #5b7ea6;
+  --bg:            var(--g-bg);
   --surface:       #ffffff;
-  --surface-2:     #f8f9fc;
-  --surface-3:     #f1f3f8;
+  --surface-2:     #f8f9fa;
+  --surface-3:     #f1f3f5;
   --cream:         #faf8f4;
   --warm-gray:     #f5f3ef;
   --paper:         #fffef9;
-
-  /* Texte */
-  --text:          #111827;
-  --text-soft:     #374151;
-  --text-muted:    #6b7280;
+  --text:          var(--g-text);
+  --text-soft:     var(--g-text-soft);
+  --text-muted:    var(--g-muted);
   --text-light:    #9ca3af;
   --ink:           #1c1917;
   --ink-soft:      #44403c;
   --ink-muted:     #78716c;
   --ink-light:     #a8a29e;
-
-  /* Borders */
-  --border:        #e5e7eb;
-  --border-light:  #f0f0f5;
-
-  /* States */
-  --error:         #dc2626;
+  --border:        var(--g-border);
+  --border-light:  #ececee;
+  --error:         #c2410c;
   --success:       #059669;
   --warning:       #d97706;
-
-  /* Shadows */
   --shadow-xs:     0 1px 3px rgba(0,0,0,0.06);
   --shadow-sm:     0 2px 8px rgba(0,0,0,0.08);
   --shadow:        0 4px 20px rgba(0,0,0,0.10);
   --shadow-lg:     0 8px 40px rgba(0,0,0,0.12);
-
-  /* Radius */
   --radius-xs: 5px;
-  --radius-sm: 10px;
-  --radius:    14px;
-  --radius-lg: 20px;
-
-  /* Layout */
-  --sidebar-w:  252px;
-  --header-h:   62px;
-  --sidebar:    252px;
-  --header:     62px;
-
-  /* Auth page variables */
+  --radius-sm: 8px;
+  --radius:    12px;
+  --radius-lg: 18px;
+  --sidebar-w:  236px;
+  --header-h:   64px;
+  --sidebar:    236px;
+  --header:     64px;
   --input-bg:  #f8fafc;
+
+  --font-body: var(--font-barlow), 'Segoe UI', sans-serif;
+  --font-title: var(--font-barlow-condensed), var(--font-barlow), 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+
+/* Sombre : noir graphite */
+:root[data-theme="dark"] {
+  --g-bg:            #121417;
+  --g-surface:       #16191d;
+  --g-card:          #181b20;
+  --g-border:        #2a2f36;
+  --g-border-strong: #39404a;
+  --g-text:          #f1f3f5;
+  --g-text-soft:     #c8ced6;
+  --g-muted:         #8b939e;
+  --g-accent:        #6f93bd;
+  --g-accent-hover:  #82a5cd;
+  --g-accent-text:   #0c1117;
+  --g-chip-bg:       #222a35;
+  --g-chip-text:     #b7c9df;
+  --g-row-active:    #1d2733;
+  --g-mark:          #2a3d55;
+  --g-input:         #1d2126;
+  --g-sidebar:       #0d0f12;
+  --g-sidebar-2:     #24364d;
+  --g-sidebar-text:  #d3d9e1;
+  --g-sidebar-muted: #7d8794;
+  --g-hero:          #0d0f12;
+  --g-paper:         #1f2329;
+  --g-shadow:        0 1px 2px rgba(0,0,0,0.4);
+
+  --surface:   #16191d;
+  --surface-2: #1b1f24;
+  --surface-3: #20252b;
+  --border-light: #2a2f36;
+  --input-bg:  #1d2126;
+  --text-light: #6b7480;
+  color-scheme: dark;
+}
+
+/* Bleu nuit */
+:root[data-theme="blue"] {
+  --g-bg:            #061a3a;
+  --g-surface:       #08204a;
+  --g-card:          #0a2450;
+  --g-border:        #1b3a68;
+  --g-border-strong: #2a4d80;
+  --g-text:          #f2f6fc;
+  --g-text-soft:     #c9d6ea;
+  --g-muted:         #8ea3c4;
+  --g-accent:        #7aa2d6;
+  --g-accent-hover:  #93b6e3;
+  --g-accent-text:   #04142e;
+  --g-chip-bg:       #12315f;
+  --g-chip-text:     #bcd2f0;
+  --g-row-active:    #0f2d5a;
+  --g-mark:          #1d4479;
+  --g-input:         #0b2552;
+  --g-sidebar:       #04142e;
+  --g-sidebar-2:     #163866;
+  --g-sidebar-text:  #d6e2f3;
+  --g-sidebar-muted: #7f95b8;
+  --g-hero:          #04142e;
+  --g-paper:         #0f2a55;
+  --g-shadow:        0 1px 2px rgba(0,0,0,0.35);
+
+  --surface:   #08204a;
+  --surface-2: #0a2450;
+  --surface-3: #0d2a5a;
+  --border-light: #1b3a68;
+  --input-bg:  #0b2552;
+  --text-light: #6f86ab;
+  color-scheme: dark;
 }
 
 html, body {
   height: 100%;
-  font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: var(--font-body);
+  background: var(--g-bg);
+  color: var(--g-text);
   -webkit-font-smoothing: antialiased;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-a { color: var(--primary); text-decoration: none; }
+a { color: var(--g-accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button { cursor: pointer; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--g-border-strong); border-radius: 99px; }
+
+:focus-visible { outline: 2px solid var(--g-accent); outline-offset: 2px; }

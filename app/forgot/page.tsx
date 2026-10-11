@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import s from './forgot.module.css'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+import { API_BASE as API, ENSEA_EMAIL_RE } from '../../lib/api'
 
 async function sendOtp(email: string) {
   const r = await fetch(`${API}/auth/forgot-password/`, {
@@ -52,6 +52,7 @@ export default function ForgotPage() {
   const handleSendOtp = async () => {
     setError('')
     if (!email.trim()) { setError('Veuillez entrer votre email.'); return }
+    if (!ENSEA_EMAIL_RE.test(email.trim())) { setError('Utilise ton adresse institutionnelle nom@ensea.edu.ci.'); return }
     setLoading(true)
     try {
       await sendOtp(email.trim().toLowerCase())
@@ -130,7 +131,7 @@ export default function ForgotPage() {
             <input
               className={s.emailInput}
               type="email"
-              placeholder="exemple@ensea.ed.ci"
+              placeholder="nom@ensea.edu.ci"
               value={email}
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSendOtp()}

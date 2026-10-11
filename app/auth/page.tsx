@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import styles from './auth.module.css'
 
 /* ── API ─────────────────────────────────────────────────────── */
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api'
+import { API_BASE as API, ENSEA_EMAIL_RE } from '../../lib/api'
 
 async function doLogin(email: string, password: string) {
   const res = await fetch(`${API}/auth/login/`, {
@@ -155,7 +155,7 @@ function LoginForm() {
   const validate = () => {
     const e: typeof errors = {}
     if (!email)    e.email    = "L'email est requis."
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Email invalide.'
+    else if (!ENSEA_EMAIL_RE.test(email.trim())) e.email = 'Utilise ton adresse institutionnelle nom@ensea.edu.ci.'
     if (!password) e.password = 'Le mot de passe est requis.'
     return e
   }
@@ -201,7 +201,7 @@ function LoginForm() {
       )}
       <InputField
         label="Email institutionnel" type="email"
-        placeholder="prenom.nom@universite.edu"
+        placeholder="nom@ensea.edu.ci"
         value={email} onChange={setEmail}
         icon={<MailIcon />} error={errors.email}
       />
@@ -237,7 +237,7 @@ function RegisterForm() {
     const e: Record<string, string> = {}
     if (!name.trim()) e.name    = 'Le nom complet est requis.'
     if (!email)       e.email   = "L'email est requis."
-    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Email invalide.'
+    else if (!ENSEA_EMAIL_RE.test(email.trim())) e.email = 'Utilise ton adresse institutionnelle nom@ensea.edu.ci.'
     if (!password)    e.password = 'Le mot de passe est requis.'
     else if (password.length < 8) e.password = 'Au moins 8 caractères.'
     if (!confirm)     e.confirm  = 'Veuillez confirmer le mot de passe.'
@@ -294,7 +294,7 @@ function RegisterForm() {
       />
       <InputField
         label="Email institutionnel" type="email"
-        placeholder="prenom.nom@universite.edu"
+        placeholder="nom@ensea.edu.ci"
         value={email} onChange={setEmail}
         icon={<MailIcon />} error={errors.email}
       />

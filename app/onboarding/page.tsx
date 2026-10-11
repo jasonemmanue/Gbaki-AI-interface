@@ -32,7 +32,8 @@ export default function OnboardingPage() {
   const [error,     setError]     = useState('')
 
   useEffect(() => {
-    apiGetClasses().then(setClasses).catch(console.error)
+    // Pour le moment, seule la filière AS est ouverte
+    apiGetClasses().then(cs => setClasses(cs.filter(c => c.code.toUpperCase().startsWith('AS')))).catch(console.error)
     const p = getProfile()
     if (p) { setProfileId(p.id); if (p.class_id) setSelected(p.class_id) }
     else apiMe()

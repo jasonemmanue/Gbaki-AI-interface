@@ -1,36 +1,36 @@
 /*
- * GBAKI-Searcher — app/layout.tsx
- * Stockage : gbaki-searcher/app/layout.tsx
- * ✅ Ajout : ThemeProvider + LangProvider
+ * GBAKI-AI — app/layout.tsx
+ * Polices Barlow / Barlow Condensed, thème (3 modes) et langue.
  */
 import type { Metadata } from 'next'
+import { Barlow, Barlow_Condensed } from 'next/font/google'
 import './globals.css'
 import { LangProvider } from '../context/LangContext'
+import { ThemeProvider, THEME_INIT_SCRIPT } from '../context/ThemeContext'
+
+const barlow = Barlow({
+  subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-barlow', display: 'swap',
+})
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-barlow-condensed', display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: 'GBAKI-Searcher — Manuel numérique ENSEA',
-  description: 'Trouvez vos supports pédagogiques en quelques secondes. ENSEA Data Science Club.',
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
+  title: 'Gbaki-AI — la mémoire de l\'excellence',
+  description: 'Bibliothèque de la filière AS de l\'ENSEA : cours, TD, sujets et corrigés, avec recherche dans le texte des documents. Porté par l\'ENSEA Data Science Club.',
+  icons: { icon: '/logo.png', apple: '/logo.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${barlow.variable} ${barlowCondensed.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
-        <LangProvider>
-            {children}
-          </LangProvider>
+        <ThemeProvider>
+          <LangProvider>{children}</LangProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

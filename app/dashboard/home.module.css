@@ -1,0 +1,86 @@
+.page { display: flex; flex-direction: column; gap: 22px; max-width: 1180px; }
+
+/* ── Bandeau ─────────────────────────────────────────────── */
+.hero {
+  display: grid; grid-template-columns: 1.85fr 1fr;
+  background: var(--g-hero); border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--g-border);
+  min-height: 236px;
+}
+.heroText { padding: 40px 32px; color: #fff; display: flex; flex-direction: column; justify-content: center; }
+.kicker { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #a9bad0; margin-bottom: 14px; }
+.heroTitle { font-family: var(--font-title); font-weight: 700; font-size: clamp(26px, 3.2vw, 36px); line-height: 1.08; margin-bottom: 12px; }
+.heroSub { font-size: 15px; color: #dfe6ef; margin-bottom: 22px; }
+.heroActions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btnLight, .btnGhost {
+  font-family: var(--font-title); font-weight: 600; font-size: 14px;
+  padding: 9px 16px; border-radius: 8px; text-decoration: none;
+}
+.btnLight { background: #fff; color: #1b2430; }
+.btnGhost { border: 1px solid #5d6f86; color: #fff; }
+.btnLight:hover, .btnGhost:hover { text-decoration: none; filter: brightness(0.95); }
+.heroImage { background: #7b9cc4 url('/hero.png') center / cover no-repeat; }
+
+/* ── Cartes recherche / IA ───────────────────────────────── */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card {
+  background: var(--g-surface); border: 1px solid var(--g-border); border-radius: 14px;
+  padding: 22px 20px 18px;
+}
+.cardKicker {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--g-muted);
+  margin-bottom: 12px;
+}
+.cardTitle { font-family: var(--font-title); font-weight: 700; font-size: 20px; margin-bottom: 14px; }
+.inputRow { display: flex; gap: 8px; }
+.input {
+  flex: 1; min-width: 0; height: 40px; padding: 0 12px;
+  border: 1px solid var(--g-border); border-radius: 8px;
+  background: var(--g-input); color: var(--g-text); font-size: 14px;
+}
+.input::placeholder { color: var(--g-muted); }
+.btn {
+  height: 40px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid var(--g-border); background: var(--g-card); color: var(--g-text);
+  font-family: var(--font-title); font-weight: 600; font-size: 14px;
+}
+.btn:hover { border-color: var(--g-border-strong); }
+.cardHint { font-size: 12.5px; color: var(--g-muted); margin-top: 12px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.chip {
+  border: 0; border-radius: 6px; padding: 5px 9px;
+  background: var(--g-chip-bg); color: var(--g-chip-text); font-size: 12px;
+}
+
+/* ── Ajoutés récemment ───────────────────────────────────── */
+.sectionHead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.sectionTitle { font-family: var(--font-title); font-weight: 700; font-size: 17px; }
+.sectionLink { font-size: 13px; color: var(--g-text); text-decoration: underline; text-underline-offset: 3px; }
+.recent { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.docCard {
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--g-surface); border: 1px solid var(--g-border); border-radius: 12px;
+  padding: 14px; color: var(--g-text); text-decoration: none; min-height: 92px;
+}
+.docCard:hover { text-decoration: none; border-color: var(--g-border-strong); }
+.docChips { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag, .tagMuted { font-size: 11px; border-radius: 5px; padding: 2px 7px; }
+.tag { background: var(--g-chip-bg); color: var(--g-chip-text); }
+.tagMuted { background: var(--g-input); color: var(--g-text-soft); }
+.docTitle { font-family: var(--font-title); font-weight: 700; font-size: 15px; line-height: 1.2;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.docMeta { font-size: 12px; color: var(--g-muted); margin-top: auto; }
+.skeleton { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.5; } }
+
+@media (max-width: 1100px) {
+  .recent { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; }
+  .heroImage { min-height: 160px; order: -1; }
+  .heroText { padding: 24px 20px; }
+  .cards { grid-template-columns: 1fr; }
+  .recent { grid-template-columns: 1fr; }
+}

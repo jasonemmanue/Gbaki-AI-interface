@@ -81,6 +81,82 @@ export const translations = {
     settingsAccountSwitch: 'Basculer vers ce compte',
     settingsAccountErrEmail: 'Entrez le nouvel email institutionnel.',
     settingsAccountErrPass: 'Entrez le mot de passe du nouveau compte.',
+    // ── Gbaki-AI (refonte) ──
+    navDocuments: 'Documents',
+    navSmartSearch: 'Recherche intelligente',
+    navAssistant: 'Assistant IA',
+    poweredBy: 'Porté par',
+    heroKicker: 'Bibliothèque de la filière',
+    heroTitle: "Gbaki-AI la mémoire de l'excellence",
+    heroSub: 'Là où le savoir et la préparation se rencontrent.',
+    heroExplore: 'Explorer les documents',
+    heroAsk: "Poser une question à l'IA",
+    cardSearchKicker: 'Recherche intelligente',
+    cardSearchTitle: "Tu ne sais pas où chercher ? T'inquiète.",
+    cardSearchPlaceholder: 'Une phrase, un mot, même mal orthographié…',
+    cardSearchHint: 'Trouve le passage exact, à la page et à la ligne près.',
+    cardAiKicker: 'IA personnalisée',
+    cardAiTitle: 'Une IA qui connaît les cours de ta filière.',
+    cardAiPlaceholder: 'Demande à Gbaki-AI…',
+    cardAiBtn: 'Demander',
+    recentTitle: 'Ajoutés récemment',
+    recentAll: 'Tous les documents →',
+    docsFilterTitle: 'Filtrer par titre…',
+    colTitle: 'Titre',
+    colTeacher: 'Enseignant',
+    colType: 'Type',
+    colYear: 'Année',
+    pagesWord: 'pages',
+    pageWord: 'page',
+    openBtn: 'Ouvrir',
+    sameSubject: 'Dans la même matière',
+    sizeLabel: 'Taille',
+    folderFiles: 'Fichiers du dossier',
+    folderBadge: 'Dossier',
+    selectDocHint: 'Sélectionne un document pour voir sa première page.',
+    noThumbnail: 'Aperçu indisponible pour ce format',
+    prevBtn: 'Précédent',
+    nextBtn: 'Suivant',
+    pageOf: 'Page {p} sur {n}',
+    searchExamples: 'Exemples :',
+    searchUnderstood: 'Compris',
+    searchText: 'Texte',
+    searchCorrected: 'corrigé en',
+    tabAll: 'Tout',
+    tabExact: 'Exactes',
+    tabClose: 'Proches',
+    matchesIn: '{n} correspondances dans {d} documents',
+    kindExact: 'Exacte',
+    kindClose: 'Proche',
+    foundFor: 'Trouvé « {w} » pour « {f} ».',
+    openAtPage: 'Ouvrir à cette page',
+    exactNote: 'La phrase recherchée apparaît telle quelle à la ligne {n}.',
+    closeNote: 'Les mots recherchés, ou des mots proches, apparaissent à la ligne {n}.',
+    exactMatch: 'Correspondance exacte',
+    closeMatch: 'Correspondance proche',
+    searchIntro: "Cherche une notion dans le texte de tous les documents : Gbaki-AI te donne la page et la ligne.",
+    searchNothing: 'Aucun passage trouvé. Essaie un autre mot ou une formulation plus courte.',
+    searchScopeMine: 'Ma classe',
+    searchScopeAll: 'Toute la filière AS',
+    searchPlaceholderFull: 'Une phrase, un mot, même mal orthographié…',
+    searching: 'Recherche…',
+    lineWord: 'ligne',
+    assistantSources: 'Sources : documents {c}',
+    newConversation: 'Nouvelle conversation',
+    assistantSoonTitle: "L'assistant arrive bientôt",
+    assistantSoonText: "Il répondra à tes questions à partir des cours, TD et sujets de ta filière, avec les pages sources. En attendant, la recherche intelligente retrouve déjà les passages exacts.",
+    assistantTry: 'Essayer la recherche intelligente',
+    assistantPlaceholder: 'Pose ta question sur un cours, un exercice, un examen…',
+    sendBtn: 'Envoyer',
+    assistantDisclaimer: "L'assistant répondra à partir des documents de ta filière et peut se tromper : vérifie avec la source.",
+    conversations: 'Conversations',
+    settingsTabAppearance: '🎨 Apparence',
+    settingsAppearanceTitle: 'Thème',
+    settingsAppearanceSub: "Choisis l'apparence de Gbaki-AI. Le choix est gardé sur cet appareil.",
+    themeLight: 'Clair',
+    themeDark: 'Sombre',
+    themeBlue: 'Bleu nuit',
+    emailEnsea: 'Utilise ton adresse institutionnelle nom@ensea.edu.ci.',
   },
   en: {
     // Topbar
@@ -154,6 +230,82 @@ export const translations = {
     settingsAccountSwitch: 'Switch to this account',
     settingsAccountErrEmail: 'Please enter the new institutional email.',
     settingsAccountErrPass: 'Please enter the password for the new account.',
+    // ── Gbaki-AI (redesign) ──
+    navDocuments: 'Documents',
+    navSmartSearch: 'Smart search',
+    navAssistant: 'AI assistant',
+    poweredBy: 'Powered by',
+    heroKicker: 'Programme library',
+    heroTitle: 'Gbaki-AI, the memory of excellence',
+    heroSub: 'Where knowledge meets preparation.',
+    heroExplore: 'Browse documents',
+    heroAsk: 'Ask the AI',
+    cardSearchKicker: 'Smart search',
+    cardSearchTitle: "Not sure where to look? Don't worry.",
+    cardSearchPlaceholder: 'A phrase, a word, even misspelled…',
+    cardSearchHint: 'Finds the exact passage, down to the page and line.',
+    cardAiKicker: 'Personal AI',
+    cardAiTitle: 'An AI that knows your programme courses.',
+    cardAiPlaceholder: 'Ask Gbaki-AI…',
+    cardAiBtn: 'Ask',
+    recentTitle: 'Recently added',
+    recentAll: 'All documents →',
+    docsFilterTitle: 'Filter by title…',
+    colTitle: 'Title',
+    colTeacher: 'Teacher',
+    colType: 'Type',
+    colYear: 'Year',
+    pagesWord: 'pages',
+    pageWord: 'page',
+    openBtn: 'Open',
+    sameSubject: 'Same subject',
+    sizeLabel: 'Size',
+    folderFiles: 'Folder files',
+    folderBadge: 'Folder',
+    selectDocHint: 'Select a document to see its first page.',
+    noThumbnail: 'No preview for this format',
+    prevBtn: 'Previous',
+    nextBtn: 'Next',
+    pageOf: 'Page {p} of {n}',
+    searchExamples: 'Examples:',
+    searchUnderstood: 'Understood',
+    searchText: 'Text',
+    searchCorrected: 'corrected to',
+    tabAll: 'All',
+    tabExact: 'Exact',
+    tabClose: 'Close',
+    matchesIn: '{n} matches in {d} documents',
+    kindExact: 'Exact',
+    kindClose: 'Close',
+    foundFor: 'Found “{w}” for “{f}”.',
+    openAtPage: 'Open at this page',
+    exactNote: 'The searched phrase appears as is on line {n}.',
+    closeNote: 'The searched words, or close ones, appear on line {n}.',
+    exactMatch: 'Exact match',
+    closeMatch: 'Close match',
+    searchIntro: 'Search a notion in the text of every document: Gbaki-AI gives you the page and the line.',
+    searchNothing: 'No passage found. Try another word or a shorter phrase.',
+    searchScopeMine: 'My class',
+    searchScopeAll: 'Whole AS programme',
+    searchPlaceholderFull: 'A phrase, a word, even misspelled…',
+    searching: 'Searching…',
+    lineWord: 'line',
+    assistantSources: 'Sources: {c} documents',
+    newConversation: 'New conversation',
+    assistantSoonTitle: 'The assistant is coming soon',
+    assistantSoonText: 'It will answer your questions from your programme courses, tutorials and past papers, with source pages. Meanwhile, smart search already finds exact passages.',
+    assistantTry: 'Try smart search',
+    assistantPlaceholder: 'Ask about a course, an exercise, an exam…',
+    sendBtn: 'Send',
+    assistantDisclaimer: 'The assistant will answer from your programme documents and can be wrong: check the source.',
+    conversations: 'Conversations',
+    settingsTabAppearance: '🎨 Appearance',
+    settingsAppearanceTitle: 'Theme',
+    settingsAppearanceSub: 'Choose how Gbaki-AI looks. The choice is kept on this device.',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeBlue: 'Midnight blue',
+    emailEnsea: 'Use your institutional address name@ensea.edu.ci.',
   },
 } satisfies Record<Lang, Record<string, string>>
 
@@ -162,7 +314,7 @@ export type TranslationKey = keyof typeof translations.fr
 interface LangContextValue {
   lang: Lang
   toggleLang: () => void
-  t: (key: TranslationKey) => string
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string
 }
 
 const LangContext = createContext<LangContextValue>({
@@ -179,6 +331,8 @@ export function LangProvider({ children }: { children: ReactNode }) {
     if (saved === 'fr' || saved === 'en') setLang(saved)
   }, [])
 
+  useEffect(() => { document.documentElement.lang = lang }, [lang])
+
   const toggleLang = () => {
     setLang(prev => {
       const next: Lang = prev === 'fr' ? 'en' : 'fr'
@@ -187,7 +341,11 @@ export function LangProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const t = (key: TranslationKey): string => translations[lang][key] ?? key
+  const t = (key: TranslationKey, vars?: Record<string, string | number>): string => {
+    let out: string = translations[lang][key] ?? key
+    if (vars) for (const [k, v] of Object.entries(vars)) out = out.split(`{${k}}`).join(String(v))
+    return out
+  }
 
   return (
     <LangContext.Provider value={{ lang, toggleLang, t }}>

@@ -1,7 +1,10 @@
-// gbaki-searcher/lib/api.ts
-// ✅ Ajout : apiGetNotificationsToday()
+// gbaki-searcher/lib/api.ts — client de l'API Django Gbaki
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://gbaki-backend-production.up.railway.app/api'
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://gbaki-backend-production-link.up.railway.app/api'
+const BASE = API_BASE
+
+/** Seules les adresses institutionnelles nom@ensea.edu.ci sont acceptées côté étudiant. */
+export const ENSEA_EMAIL_RE = /^[a-z0-9][a-z0-9._-]*@ensea\.edu\.ci$/i
 
 /* ── Token helpers ────────────────────────────────── */
 export function getToken(): string | null {
@@ -77,11 +80,21 @@ export interface Document {
   updated_at: string
   previewable: boolean
   badges: string[]
+  is_folder: boolean
+  page_count: number | null
+  has_thumbnail: boolean
+  subject_id: string
+  academic_year_id: string
+  document_type_id: string
 }
 
 export interface DocumentsResponse {
   count: number
+  page: number
+  page_size: number
+  num_pages: number
   results: Document[]
+  suggestions?: string[]
 }
 
 export interface ClassItem {
@@ -154,6 +167,10 @@ export async function apiUpdateProfile(id: string, payload: { class_id?: string;
 /* ── Documents ────────────────────────────────────── */
 export interface DocFilters {
   search?: string
+  title?: string
+  page?: number
+  page_size?: number
+  ordering?: 'title' | '-title' | 'year'
   class_id?: string
   subject_id?: string
   academic_year_id?: string
@@ -167,14 +184,73 @@ export async function apiGetDocuments(filters: DocFilters = {}): Promise<Documen
   // Toujours forcer is_published=true pour les users
   p.set('is_published', 'true')
   Object.entries(filters).forEach(([k, v]) => {
-    if (v !== undefined && v !== '' && k !== 'is_published') p.set(k, v)
+    if (v !== undefined && v !== '' && k !== 'is_published') p.set(k, String(v))
   })
   return apiFetch<DocumentsResponse>(`/documents/?${p.toString()}`)
+}
+
+export async function apiGetDocument(id: string): Promise<Document> {
+  return apiFetch<Document>(`/documents/${id}/`)
 }
 
 /* ── Download / Preview ───────────────────────────── */
 export async function apiGetDocumentUrl(id: string, mode: 'preview' | 'download' = 'preview'): Promise<DownloadResponse> {
   return apiFetch<DownloadResponse>(`/documents/${id}/download/?mode=${mode}`)
+}
+
+/** URL de la vignette (1re page). Publique : utilisable directement dans <img>. */
+export function thumbnailUrl(id: string): string {
+  return `${BASE}/documents/${id}/thumbnail/`
+}
+
+export interface FolderFile { name: string; path: string; size: number; url: string }
+
+export async function apiGetFolderFiles(id: string): Promise<FolderFile[]> {
+  const d = await apiFetch<{ count: number; files: FolderFile[] }>(`/documents/${id}/files/`)
+  return d.files
+}
+
+/* ── Recherche plein texte ─────────────────────────── */
+export interface SearchHit {
+  document_id: string
+  page: number
+  line: number
+  text: string
+  kind: 'exact' | 'close'
+  spans: [number, number][]
+  found: { word: string; for: string } | null
+}
+
+export interface SearchDoc {
+  id: string; title: string; mime_type: string | null; page_count: number | null
+  subject: string | null; document_type: string | null; academic_year: string | null; class_code: string | null
+}
+
+export interface FulltextResponse {
+  query: string
+  terms: string[]
+  corrections: { from: string; to: string }[]
+  count: number
+  exact_count: number
+  close_count: number
+  documents_count: number
+  documents: Record<string, SearchDoc>
+  results: SearchHit[]
+}
+
+export async function apiFulltextSearch(q: string, classId?: string | null): Promise<FulltextResponse> {
+  const p = new URLSearchParams({ q })
+  if (classId) p.set('class_id', classId)
+  return apiFetch<FulltextResponse>(`/search/fulltext/?${p.toString()}`)
+}
+
+export interface PageLine { n: number; text: string; spans: [number, number][] }
+export interface PageText { document_id: string; page: number; page_count: number | null; lines: PageLine[] }
+
+export async function apiGetPageText(id: string, n: number, q = ''): Promise<PageText> {
+  const p = new URLSearchParams({ n: String(n) })
+  if (q) p.set('q', q)
+  return apiFetch<PageText>(`/documents/${id}/page/?${p.toString()}`)
 }
 
 /* ── Référentiels ─────────────────────────────────── */
