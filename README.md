@@ -33,7 +33,9 @@ NEXT_PUBLIC_API_URL=https://gbaki-backend-production-link.up.railway.app/api
 | `/dashboard/assistant` | Assistant IA : mise en page prête, pas encore branché sur un modèle (renvoie vers la recherche) |
 | `/settings` | Classe, compte, apparence |
 
-Thèmes : clair, sombre, bleu nuit (Paramètres → Apparence). Langue : FR / EN (bouton de l'en-tête).
+Thèmes : clair, sombre, bleu nuit (Paramètres → Apparence), appliqués à toutes les pages du tableau
+de bord et aux paramètres. Langue : FR / EN (bouton de l'en-tête). Logo : `components/shell.tsx`
+(`BrandMark`, SVG redessiné d'après `public/logo.png`).
 
 ## Structure
 

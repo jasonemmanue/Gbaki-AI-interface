@@ -198,7 +198,7 @@ function DocPanel({ doc, onClose, onSelect }: { doc: Document; onClose: () => vo
     const parts = []
     if (doc.page_count) parts.push(`${doc.page_count} ${t('pagesWord')}`)
     parts.push(formatSize(doc.file_size))
-    return parts.join(' · ')
+    return parts.filter(Boolean).join(' · ')
   }, [doc.page_count, doc.file_size, t])
 
   return (
@@ -227,9 +227,9 @@ function DocPanel({ doc, onClose, onSelect }: { doc: Document; onClose: () => vo
       )}
 
       <div className={s.meta}>
-        <Meta label={t('filterSubject')} value={doc.subject ?? '—'} />
+        <Meta label={t('filterSubject')} value={doc.subject ?? ''} />
         <Meta label={t('colTeacher')} value={teacherNames(doc)} />
-        <Meta label={t('colYear')} value={doc.academic_year ?? '—'} />
+        <Meta label={t('colYear')} value={doc.academic_year ?? ''} />
         <Meta label={t('sizeLabel')} value={sizeLine} />
       </div>
 

@@ -134,18 +134,8 @@ export default function SettingsPage() {
         <button
           onClick={toggleLang}
           title={lang === 'fr' ? 'Switch to English' : 'Passer en français'}
-          style={{
-            marginLeft: 'auto',
-            fontWeight: 700,
-            fontSize: 12,
-            letterSpacing: '0.03em',
-            padding: '6px 12px',
-            background: 'rgba(37,99,235,0.1)',
-            border: '1px solid rgba(37,99,235,0.3)',
-            borderRadius: 8,
-            cursor: 'pointer',
-            color: 'var(--primary, #2563eb)',
-          }}
+          className={s.backBtn}
+          style={{ marginLeft: 'auto' }}
         >
           {lang === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
         </button>

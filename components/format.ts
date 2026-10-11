@@ -2,19 +2,19 @@
 import type { Document } from '../lib/api'
 
 export function formatSize(bytes: number | null | undefined): string {
-  if (!bytes && bytes !== 0) return '—'
+  if (!bytes && bytes !== 0) return ''
   if (bytes < 1024) return `${bytes} o`
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} Mo`
 }
 
 export function teacherNames(doc: Pick<Document, 'teachers'>): string {
-  return doc.teachers.length ? doc.teachers.map(t => t.name).join(', ') : '—'
+  return doc.teachers.length ? doc.teachers.map(t => t.name).join(', ') : ''
 }
 
 /** Année courte affichée dans le tableau : « 2024-2025 » → « 2025 » (année de fin, comme les maquettes). */
 export function shortYear(label: string | null): string {
-  if (!label) return '—'
+  if (!label) return ''
   const m = label.match(/(\d{4})\D+(\d{4})/)
   return m ? m[2] : label
 }

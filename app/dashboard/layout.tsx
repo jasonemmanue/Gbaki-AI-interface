@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <button className={s.menuBtn} onClick={() => setDrawer(true)} aria-label="Ouvrir le menu"><I.Menu size={20} /></button>
             <div className={s.greeting}>
               <strong>{t('hello')}, {firstName(profile.full_name, profile.email)}</strong>
-              {profile.class_code && <span className={s.greetingSub}> — {profile.class_code}</span>}
+              {profile.class_code && <span className={s.greetingSub}> {profile.class_code}</span>}
             </div>
             <div className={s.headerRight}>
               <span className={s.poweredSmall}>{t('poweredBy')}</span>

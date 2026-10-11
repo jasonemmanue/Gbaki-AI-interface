@@ -57,7 +57,7 @@ function AssistantView() {
           <div key={i} className={s.exchange}>
             <div className={s.question}>{q}</div>
             <div className={s.answer}>
-              <span className={s.answerMark}><BrandMark /></span>
+              <span className={s.answerMark}><BrandMark size={18} /></span>
               <div>
                 <p>{t('assistantSoonTitle')}. {t('assistantSoonText')}</p>
                 <Link href={`/dashboard/recherche?q=${encodeURIComponent(q)}`} className={s.soonLink}>

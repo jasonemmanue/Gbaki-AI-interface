@@ -16,7 +16,7 @@ const barlowCondensed = Barlow_Condensed({
 })
 
 export const metadata: Metadata = {
-  title: 'Gbaki-AI — la mémoire de l\'excellence',
+  title: 'Gbaki-AI',
   description: 'Bibliothèque de la filière AS de l\'ENSEA : cours, TD, sujets et corrigés, avec recherche dans le texte des documents. Porté par l\'ENSEA Data Science Club.',
   icons: { icon: '/logo.png', apple: '/logo.png' },
 }

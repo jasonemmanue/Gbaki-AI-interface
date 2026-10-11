@@ -93,7 +93,7 @@ export default function HomePage() {
                   {doc.subject && <span className={s.tagMuted}>{doc.subject}</span>}
                 </div>
                 <div className={s.docTitle}>{doc.title}</div>
-                <div className={s.docMeta}>{teacherNames(doc) !== '—' ? `${teacherNames(doc)} · ` : ''}{formatDay(doc.created_at, lang)}</div>
+                <div className={s.docMeta}>{teacherNames(doc) ? `${teacherNames(doc)} · ` : ''}{formatDay(doc.created_at, lang)}</div>
               </Link>
             ))}
         </div>
