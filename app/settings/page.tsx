@@ -7,8 +7,7 @@ import { useTheme, THEMES, type Theme } from '../../context/ThemeContext'
 import {
   apiGetClasses, apiUpdateProfile, apiMe,
   getProfile, saveProfile, saveToken, clearAuth,
-  type ClassItem, type UserProfile,
-} from '../../lib/api'
+  type ClassItem, type UserProfile, sortClasses } from '../../lib/api'
 
 import { API_BASE as API } from '../../lib/api'
 
@@ -64,7 +63,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     // Pour le moment, seule la filière AS est ouverte
-    apiGetClasses().then(cs => setClasses(cs.filter(c => c.code.toUpperCase().startsWith('AS')))).catch(console.error)
+    apiGetClasses().then(cs => setClasses(sortClasses(cs))).catch(console.error)
     const cached = getProfile()
     if (cached) {
       setProfile(cached); setProfileId(cached.id)
@@ -108,6 +107,10 @@ export default function SettingsPage() {
       })
       const data = await r.json()
       if (!r.ok) throw new Error(data.error ?? 'Identifiants incorrects pour ce compte.')
+      if (data.verification_required) {
+        throw new Error(`Ce compte n'est pas encore vérifié : un code a été envoyé à ${data.email}. `
+          + 'Déconnecte-toi puis connecte-toi avec ce compte pour saisir le code.')
+      }
 
       clearAuth()
       saveToken(data.token)

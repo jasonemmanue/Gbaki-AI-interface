@@ -12,7 +12,9 @@ async function sendOtp(email: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   })
-  return r.json()
+  const data = await r.json().catch(() => ({}))
+  if (!r.ok) throw new Error(data.error ?? "Impossible d'envoyer le code. Réessayez.")
+  return data
 }
 
 async function checkOtp(email: string, code: string) {
@@ -59,8 +61,8 @@ export default function ForgotPage() {
       setStep(2)
       setResend(60)
       setTimeout(() => inputRefs[0].current?.focus(), 100)
-    } catch {
-      setError('Erreur réseau. Réessayez.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur réseau. Réessayez.')
     } finally { setLoading(false) }
   }
 
@@ -111,7 +113,7 @@ export default function ForgotPage() {
       setResend(60)
       setSuccess('Un nouveau code a été envoyé.')
       setTimeout(() => inputRefs[0].current?.focus(), 100)
-    } catch { setError('Erreur réseau.') }
+    } catch (err: unknown) { setError(err instanceof Error ? err.message : 'Erreur réseau.') }
     finally { setLoading(false) }
   }
 

@@ -1,7 +1,8 @@
 'use client'
 /*
  * GBAKI-AI — app/dashboard/documents/page.tsx
- * Documents de la classe : filtres, tableau paginé, panneau d'aperçu (1re page).
+ * Documents : classe (celle du profil par défaut, toutes accessibles), filtres, tableau paginé,
+ * panneau d'aperçu (1re page).
  */
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -13,8 +14,8 @@ import { fileExt, formatSize, shortYear, teacherNames } from '../../../component
 import { useShell } from '../../../components/shell'
 import { useLang } from '../../../context/LangContext'
 import {
-  apiGetDocTypes, apiGetDocument, apiGetDocuments, apiGetFolderFiles, apiGetSubjects, apiGetTeachers, apiGetYears,
-  type AcademicYear, type Document, type DocumentType, type FolderFile, type SubjectItem, type Teacher,
+  apiGetClasses, sortClasses, apiGetDocTypes, apiGetDocument, apiGetDocuments, apiGetFolderFiles, apiGetSubjects, apiGetTeachers, apiGetYears,
+  type AcademicYear, type ClassItem, type Document, type DocumentType, type FolderFile, type SubjectItem, type Teacher,
 } from '../../../lib/api'
 
 const PAGE_SIZE = 50
@@ -28,6 +29,9 @@ function DocumentsView() {
   const { t } = useLang()
   const { profile } = useShell()
 
+  // Classe consultée : ?class=… sinon celle du profil ; chaque étudiant peut parcourir toutes les classes
+  const [classes, setClasses] = useState<ClassItem[]>([])
+  const [classId, setClassId] = useState(() => params.get('class') ?? profile.class_id ?? '')
   const [subjects, setSubjects] = useState<SubjectItem[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [years, setYears] = useState<AcademicYear[]>([])
@@ -47,12 +51,15 @@ function DocumentsView() {
   const [panelOpen, setPanelOpen] = useState(false)
 
   useEffect(() => {
-    const cls = profile.class_id ?? undefined
-    apiGetSubjects(cls).then(setSubjects).catch(() => {})
+    apiGetClasses().then(cs => setClasses(sortClasses(cs))).catch(() => {})
     apiGetTeachers().then(setTeachers).catch(() => {})
     apiGetYears().then(setYears).catch(() => {})
     apiGetDocTypes().then(setTypes).catch(() => {})
-  }, [profile.class_id])
+  }, [])
+
+  useEffect(() => {
+    apiGetSubjects(classId || undefined).then(setSubjects).catch(() => {})
+  }, [classId])
 
   // Filtre par titre : attend la fin de la frappe
   useEffect(() => {
@@ -64,7 +71,7 @@ function DocumentsView() {
     let cancelled = false
     setLoading(true); setError('')
     apiGetDocuments({
-      class_id: profile.class_id ?? undefined, title: title || undefined, page, page_size: PAGE_SIZE,
+      class_id: classId || undefined, title: title || undefined, page, page_size: PAGE_SIZE,
       ordering: 'title', ...filters,
     })
       .then(d => {
@@ -75,7 +82,7 @@ function DocumentsView() {
       .catch(e => { if (!cancelled) setError((e as Error).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [profile.class_id, title, page, filters])
+  }, [classId, title, page, filters])
 
   // Document demandé dans l'URL (?doc=…), depuis l'accueil ou la recherche
   useEffect(() => {
@@ -84,7 +91,13 @@ function DocumentsView() {
   }, [params])
 
   const setFilter = (k: keyof Filters, v: string) => { setFilters(f => ({ ...f, [k]: v })); setPage(1) }
-  const reset = () => { setFilters(EMPTY); setTitleInput(''); setPage(1); router.replace('/dashboard/documents') }
+  const changeClass = (v: string) => {
+    setClassId(v); setFilters(f => ({ ...f, subject_id: '' })); setPage(1); setSelected(null)
+  }
+  const reset = () => {
+    setClassId(profile.class_id ?? ''); setFilters(EMPTY); setTitleInput(''); setPage(1); setSelected(null)
+    router.replace('/dashboard/documents')
+  }
   const select = (d: Document) => { setSelected(d); setPanelOpen(true) }
 
   return (
@@ -99,6 +112,8 @@ function DocumentsView() {
         </div>
 
         <div className={s.filters}>
+          <Select label={t('filterClass')} all={t('filterAllSubjects')} value={classId}
+            onChange={changeClass} options={classes.map(x => ({ value: x.id, label: x.label }))} />
           <Select label={t('filterSubject')} all={t('filterAllSubjects')} value={filters.subject_id}
             onChange={v => setFilter('subject_id', v)} options={subjects.map(x => ({ value: x.id, label: x.name }))} />
           <Select label={t('filterTeacher')} all={t('filterAllTeachers')} value={filters.teacher_id}

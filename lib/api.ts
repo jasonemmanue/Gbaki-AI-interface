@@ -33,6 +33,11 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   }
   if (token) headers['Authorization'] = `Token ${token}`
   const res = await fetch(`${BASE}${path}`, { ...options, headers })
+  // Jeton refusé (session expirée, ou adresse pas encore vérifiée par code) : retour à la connexion
+  if (res.status === 401 && token && typeof window !== 'undefined') {
+    clearAuth()
+    if (!window.location.pathname.startsWith('/auth')) window.location.href = '/auth'
+  }
   if (!res.ok) {
     let msg = `Erreur ${res.status}`
     try { const d = await res.json(); msg = d.error ?? d.detail ?? msg } catch { /**/ }
@@ -254,6 +259,12 @@ export async function apiGetPageText(id: string, n: number, q = ''): Promise<Pag
 }
 
 /* ── Référentiels ─────────────────────────────────── */
+/** Toutes les classes ENSEA (AS, IPS, ISE), dans l'ordre AS 1, AS 2, … IPS 1, … ISE 3. */
+export function sortClasses(cs: ClassItem[]): ClassItem[] {
+  const key = (c: ClassItem) => c.code.replace(/\s+/g, '').toUpperCase()
+  return [...cs].sort((a, b) => key(a).localeCompare(key(b), 'fr', { numeric: true }))
+}
+
 export async function apiGetClasses(): Promise<ClassItem[]> {
   return apiFetch<ClassItem[]>('/classes/')
 }

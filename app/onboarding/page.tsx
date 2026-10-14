@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import GbakiLogo from '../../components/GbakiLogo'
 import { useRouter } from 'next/navigation'
-import { apiGetClasses, apiUpdateProfile, apiMe, getProfile, saveProfile, type ClassItem } from '../../lib/api'
+import { apiGetClasses, apiUpdateProfile, apiMe, getProfile, saveProfile, type ClassItem, sortClasses } from '../../lib/api'
 import ob from './onboarding.module.css'
 
 /* ── Badge color par cycle ───────────────────────── */
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     // Pour le moment, seule la filière AS est ouverte
-    apiGetClasses().then(cs => setClasses(cs.filter(c => c.code.toUpperCase().startsWith('AS')))).catch(console.error)
+    apiGetClasses().then(cs => setClasses(sortClasses(cs))).catch(console.error)
     const p = getProfile()
     if (p) { setProfileId(p.id); if (p.class_id) setSelected(p.class_id) }
     else apiMe()

@@ -26,6 +26,7 @@ export const translations = {
     searchPlaceholder: 'Ex: cours probabilités, examen estimation, TP stats...',
     searchBtn: 'Rechercher',
     // Filters
+    filterClass: 'Classe',
     filterSubject: 'Matière',
     filterAllSubjects: 'Toutes',
     filterTeacher: 'Enseignant',
@@ -190,6 +191,7 @@ export const translations = {
     searchPlaceholder: 'E.g. probability course, estimation exam, stats lab...',
     searchBtn: 'Search',
     // Filters
+    filterClass: 'Class',
     filterSubject: 'Subject',
     filterAllSubjects: 'All',
     filterTeacher: 'Teacher',

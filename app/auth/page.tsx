@@ -1,42 +1,50 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import GbakiLogo from '../../components/GbakiLogo'
 import { useRouter } from 'next/navigation'
 import styles from './auth.module.css'
+import otp from '../forgot/forgot.module.css'
 
 /* ── API ─────────────────────────────────────────────────────── */
 import { API_BASE as API, ENSEA_EMAIL_RE } from '../../lib/api'
 
-async function doLogin(email: string, password: string) {
-  const res = await fetch(`${API}/auth/login/`, {
+/* Réponse d'auth : soit une session (token + profil), soit un code à saisir
+   (verification_required) tant que l'adresse ENSEA n'est pas vérifiée. */
+type AuthResult = {
+  token?: string
+  profile?: unknown
+  is_first_login?: boolean
+  verification_required?: boolean
+  email?: string
+}
+
+async function postAuth(path: string, body: object, fallback: string): Promise<AuthResult> {
+  const res = await fetch(`${API}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(body),
   })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error ?? 'Erreur de connexion')
-  if (typeof window !== 'undefined') {
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error ?? fallback)
+  if (data.token && typeof window !== 'undefined') {
     localStorage.setItem('gbaki_token', data.token)
     localStorage.setItem('gbaki_profile', JSON.stringify(data.profile))
   }
   return data
 }
 
-async function doRegister(email: string, password: string, full_name: string) {
-  const res = await fetch(`${API}/auth/register/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, full_name }),
-  })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error ?? 'Erreur lors de la création du compte')
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('gbaki_token', data.token)
-    localStorage.setItem('gbaki_profile', JSON.stringify(data.profile))
-  }
-  return data
-}
+const doLogin = (email: string, password: string) =>
+  postAuth('/auth/login/', { email, password }, 'Erreur de connexion')
+
+const doRegister = (email: string, password: string, full_name: string) =>
+  postAuth('/auth/register/', { email, password, full_name }, 'Erreur lors de la création du compte')
+
+const doVerifyEmail = (email: string, code: string) =>
+  postAuth('/auth/verify-email/', { email, code }, 'Code invalide.')
+
+const doResendVerification = (email: string) =>
+  postAuth('/auth/resend-verification/', { email }, "Impossible d'envoyer le code.")
 
 /* ── Logo ────────────────────────────────────────────────────── */
 function Logo() {
@@ -138,6 +146,106 @@ function InputField({
   )
 }
 
+/* ── Saisie du code de vérification (4 chiffres reçus par email) ── */
+function VerifyEmailStep({ email, onVerified }: { email: string; onVerified: (r: AuthResult) => void }) {
+  const [digits,  setDigits]  = useState(['', '', '', ''])
+  const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState('')
+  const [info,    setInfo]    = useState('')
+  const [countdown, setCountdown] = useState(60)
+  const refs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null),
+                useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
+
+  useEffect(() => { refs[0].current?.focus() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (countdown <= 0) return
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [countdown])
+
+  const verify = async (code: string) => {
+    if (code.length < 4) { setError('Entrez les 4 chiffres.'); return }
+    setError(''); setInfo(''); setLoading(true)
+    try {
+      onVerified(await doVerifyEmail(email, code))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Code invalide.')
+      setDigits(['', '', '', ''])
+      setTimeout(() => refs[0].current?.focus(), 50)
+    } finally { setLoading(false) }
+  }
+
+  const onDigit = (i: number, val: string) => {
+    if (!/^\d?$/.test(val)) return
+    const next = [...digits]
+    next[i] = val
+    setDigits(next)
+    if (val && i < 3) refs[i + 1].current?.focus()
+    if (val && i === 3 && next.every(d => d)) verify(next.join(''))
+  }
+
+  const onPaste = (e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
+    if (pasted.length === 4) { e.preventDefault(); setDigits(pasted.split('')); verify(pasted) }
+  }
+
+  const resend = async () => {
+    if (countdown > 0) return
+    setError(''); setInfo(''); setDigits(['', '', '', '']); setLoading(true)
+    try {
+      await doResendVerification(email)
+      setCountdown(60)
+      setInfo('Un nouveau code a été envoyé.')
+      setTimeout(() => refs[0].current?.focus(), 100)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur réseau.')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <div className={styles.form}>
+      <p className={styles.subtitle} style={{ textAlign: 'center' }}>
+        Pour confirmer que cette adresse t&apos;appartient, saisis le code à 4 chiffres envoyé à{' '}
+        <strong>{email}</strong>.
+      </p>
+      {error && <div className={otp.error}>{error}</div>}
+      {info  && <div className={otp.success}>{info}</div>}
+      <div className={otp.otpRow} onPaste={onPaste}>
+        {digits.map((d, i) => (
+          <input
+            key={i}
+            ref={refs[i]}
+            className={`${otp.otpInput} ${d ? otp.otpFilled : ''}`}
+            type="text"
+            inputMode="numeric"
+            autoComplete={i === 0 ? 'one-time-code' : 'off'}
+            maxLength={1}
+            value={d}
+            onChange={e => onDigit(i, e.target.value)}
+            onKeyDown={e => { if (e.key === 'Backspace' && !digits[i] && i > 0) refs[i - 1].current?.focus() }}
+            disabled={loading}
+            aria-label={`Chiffre ${i + 1}`}
+          />
+        ))}
+      </div>
+      <button
+        type="button"
+        className={styles.submitBtn}
+        onClick={() => verify(digits.join(''))}
+        disabled={loading || digits.some(d => !d)}
+      >
+        {loading ? <span className={styles.spinner} /> : 'Vérifier mon adresse'}
+      </button>
+      <div className={otp.resend}>
+        Pas reçu le code ? Regarde aussi les spams.{' '}
+        <button type="button" className={otp.resendBtn} onClick={resend} disabled={countdown > 0 || loading}>
+          {countdown > 0 ? `Renvoyer dans ${countdown}s` : 'Renvoyer'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ── LoginForm ───────────────────────────────────────────────── */
 function LoginForm() {
   const router = useRouter()
@@ -146,6 +254,14 @@ function LoginForm() {
   const [errors,   setErrors]   = useState<{ email?: string; password?: string; server?: string }>({})
   const [loading,  setLoading]  = useState(false)
   const [success,  setSuccess]  = useState(false)
+  const [verifyEmail, setVerifyEmail] = useState('')
+
+  const enter = (data: AuthResult) => {
+    setSuccess(true)
+    setTimeout(() => {
+      router.push(data.is_first_login ? '/onboarding' : '/splash')
+    }, 800)
+  }
 
   const validate = () => {
     const e: typeof errors = {}
@@ -162,17 +278,17 @@ function LoginForm() {
     setErrors({})
     setLoading(true)
     try {
-      const data = await doLogin(email, password)
-      setSuccess(true)
-      setTimeout(() => {
-        router.push(data.is_first_login ? '/onboarding' : '/splash')
-      }, 800)
+      const data = await doLogin(email.trim().toLowerCase(), password)
+      if (data.verification_required) setVerifyEmail(data.email ?? email.trim().toLowerCase())
+      else enter(data)
     } catch (err: unknown) {
       setErrors({ server: err instanceof Error ? err.message : 'Erreur de connexion' })
     } finally {
       setLoading(false)
     }
   }
+
+  if (verifyEmail && !success) return <VerifyEmailStep email={verifyEmail} onVerified={enter} />
 
   if (success) {
     return (
@@ -220,6 +336,8 @@ function LoginForm() {
 
 /* ── RegisterForm ────────────────────────────────────────────── */
 function RegisterForm() {
+  const router = useRouter()
+  const [verifyEmail, setVerifyEmail] = useState('')
   const [name,     setName]     = useState('')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
@@ -247,14 +365,22 @@ function RegisterForm() {
     setErrors({})
     setLoading(true)
     try {
-      await doRegister(email, password, name)
-      setSuccess(true)
+      const data = await doRegister(email.trim().toLowerCase(), password, name)
+      if (data.verification_required) setVerifyEmail(data.email ?? email.trim().toLowerCase())
+      else setSuccess(true)
     } catch (err: unknown) {
       setErrors({ server: err instanceof Error ? err.message : 'Erreur lors de la création du compte' })
     } finally {
       setLoading(false)
     }
   }
+
+  const verified = (data: AuthResult) => {
+    setSuccess(true)
+    setTimeout(() => router.push(data.is_first_login ? '/onboarding' : '/splash'), 800)
+  }
+
+  if (verifyEmail && !success) return <VerifyEmailStep email={verifyEmail} onVerified={verified} />
 
   const strength       = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
   const strengthLabels = ['', 'Faible', 'Moyen', 'Fort']
@@ -266,7 +392,7 @@ function RegisterForm() {
         <div className={styles.successIcon}>✓</div>
         <p className={styles.successTitle}>Compte créé avec succès !</p>
         <p className={styles.successSub}>
-          Connectez-vous pour finaliser votre inscription.
+          {verifyEmail ? 'Adresse vérifiée. Bienvenue sur Gbaki AI.' : 'Connectez-vous pour finaliser votre inscription.'}
         </p>
       </div>
     )
